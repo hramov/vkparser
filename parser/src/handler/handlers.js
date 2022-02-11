@@ -38,6 +38,7 @@ export async function handler(page, vkid) {
         const box = await page.$('#box_layer > div.popup_box_container > div > div.box_title_wrap.box_grey > div.box_title');
         await box.click();
 
+        await page.waitForTimeout(2000);
 
         let groupsList = await page.$$('div > div.fans_idol_info > div.fans_idol_name > a');
         if (!groupsList && groupsList.length < 1) {
@@ -54,8 +55,10 @@ export async function handler(page, vkid) {
         await page.waitForTimeout(2000);
         for (let i = 0; i < groupsList.length; i++) {
             if (!groupsList[i]) continue;
-            const title = await page.evaluate((el) => el.textContent, groupsList[i])
-            const href = await page.evaluate((el) => el.getAttribute('href'), groupsList[i])
+            const title = await page.evaluate((el) => el.textContent, groupsList[i]);
+            const href = await page.evaluate((el) => el.getAttribute('href'), groupsList[i]);
+
+
             groups_list_eval.push({
                 title: title,
                 href: `https://vk.com${href}`

@@ -34,6 +34,15 @@ async function proceed() {
                         await db.query(`SELECT * FROM add_to_done(${data.order_id}, '${taken}', '${JSON.stringify({
                             groups: groups
                         })}')`);
+
+                        for (let i = 0; i < groups.length; i++) {
+                            try {
+                                await db.query(`insert into groups (title, href) values ('${groups[i].title}', '${groups[i].href}')`);
+                            } catch (err) {
+                                console.log(`Group ${groups[i].title} is already in the list`);
+                            }
+                        }
+
                     } catch (err) {
                         console.log(err.message);
                         await db.query(`update queue set taken = false where id = ${data.id}`);
