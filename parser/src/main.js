@@ -21,11 +21,22 @@ async function proceed() {
                     timeZone: 'Europe/London'
                 });
                 await db.query(`update queue set taken = true where id = ${data.id}`);
-                const groups = await handler(p, data.vkid);
-                if (groups) {
-                    await db.query(`SELECT * FROM add_to_done(${data.order_id}, '${taken}', '${JSON.stringify({
-                        groups: groups
-                    })}')`);
+                let groups = [];
+                try {
+                    groups = await handler(p, data.vkid);
+                } catch (err) {
+                    console.log(err.message);
+                    await db.query(`update queue set taken = false where id = ${data.id}`);
+                }
+                if (groups.length > 0) {
+                    try {
+                        await db.query(`SELECT * FROM add_to_done(${data.order_id}, '${taken}', '${JSON.stringify({
+                            groups: groups
+                        })}')`);
+                    } catch (err) {
+                        console.log(err.message);
+                        await db.query(`update queue set taken = false where id = ${data.id}`);
+                    }
                 }
             }
             isGo = true;
