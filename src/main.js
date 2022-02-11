@@ -9,6 +9,7 @@ async function main() {
         `postgres://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`
     );
     const app = express();
+    app.use(express.json());
 
     app.get('/:person_id', async (req, res) => {
         // const auth = req.headers.authorization;
@@ -26,14 +27,6 @@ async function main() {
             });
         }
     });
-
-    app.post('/', (req, res) => {
-        const data = req.body.result;
-        const vkid = req.body.vkid;
-        const client_id = db.query(`select client_id from orders where parse_id = (select id from parse where vkid = '${vkid}')`);
-        await db.query(`SELECT * FROM add_to_done(${client_id}, ${data})`);
-        res.end();
-    })
 
     app.get('/', async (req, res) => {
         // const client_id = req.headers.authorization.id;

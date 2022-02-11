@@ -12,18 +12,21 @@ const p = await page();
 await proceed();
 
 async function proceed() {
-    const isGo = true;
-    setInterval(() => {
+    let isGo = true;
+    setInterval(async () => {
         if (isGo) {
             isGo = false;
             const data = await db.oneOrNone('select * from queue limit 1');
             if (data) {
                 const groups = await handler(p, data.vkid);
                 if (groups) {
-                    await axios.post('http://localhost:5000', {
-                        vkid: data.vkid,
-                        data: groups,
-                    })
+                    console.log(groups);
+                    console.log(JSON.stringify(groups));
+                    const client_id = await db.oneOrNone(`select client_id from orders where parse_id = (select id from parse where vkid = '${data.vkid}')`);
+                    console.log(client_id);
+                    await db.query(`SELECT * FROM add_to_done(${client_id.client_id}, '${JSON.stringify({
+                        groups: groups
+                    })}')`);
                 }
             }
             isGo = true;
