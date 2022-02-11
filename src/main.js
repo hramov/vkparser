@@ -56,7 +56,7 @@ async function main() {
                     message: 'User is already registered!'
                 })
             } else {
-                const id = await db.query(`insert into client (email, password) values ('${email}', '${hashPassword(password)}') returning id`);
+                const id = await db.query(`insert into client (email, password) values ('${email}', '${await hashPassword(password)}') returning id`);
                 if (id[0].id) {
                     res.json({
                         status: true,
@@ -80,7 +80,7 @@ async function main() {
             });
         } else {
             const { email, password } = req.body.client;
-            const candidate = await db.oneOrNone(`select id from client where email = '${email}' and password='${hashPassword(password)}'`);
+            const candidate = await db.oneOrNone(`select id from client where email = '${email}' and password='${await hashPassword(password)}'`);
             if (candidate) {
                 res.status(200).json({
                     id: candidate.id,
