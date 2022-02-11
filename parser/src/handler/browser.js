@@ -10,7 +10,7 @@ export const browser = await puppeteer.launch({
         "--disable-setuid-sandbox",
         "--no-sandbox",
     ],
-    headless: false,
+    headless: true,
     ignoreHTTPSErrors: true,
     ignoreDefaultArgs: ["--disable-extensions"],
     slowMo: 50,

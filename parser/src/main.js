@@ -37,7 +37,7 @@ async function proceed() {
 
                         for (let i = 0; i < groups.length; i++) {
                             try {
-                                await db.query(`insert into groups (title, href) values ('${groups[i].title}', '${groups[i].href}')`);
+                                await db.query(`insert into groups (title, href) values ('${groups[i].title}', '${groups[i].href}') on conflict do nothing`);
                             } catch (err) {
                                 console.log(`Group ${groups[i].title} is already in the list`);
                             }
