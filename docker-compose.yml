@@ -1,0 +1,61 @@
+version: "3"
+services:
+  server:
+    image: vk_parser_server
+    container_name: vk_parser_server
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      - APP_HOST=hramovdev.ru
+      - APP_PORT=5000
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=database_admin
+      - DB_PASSWORD=grafserega1997
+      - DB_NAME=vkparser
+    networks:
+      - postgres
+
+  parser:
+    image: vk_parser_bot
+    container_name: vk_parser_bot
+    ports:
+      - "5001:5001"
+    depends_on:
+      - db
+    environment:
+      - URL=https://vk.com
+      - VK_EMAIL=trykhramov@gmail.com
+      - VK_PASSWORD=SeR19eGa9723792803
+      - VK_ID=therealhramov
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=database_admin
+      - DB_PASSWORD=grafserega1997
+      - DB_NAME=vkparser
+    networks:
+      - postgres
+
+  db:
+    image: postgres
+    container_name: vk_parser_db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=grafserega1997
+      - PG_DATA=/data/postgres
+    volumes:
+      - postgres:/data/postgres
+      - ./data/sql:/docker-entrypoint-initdb.d/
+    networks:
+      - postgres
+
+volumes:
+  postgres:
+  logs:
+
+networks:
+  postgres:
+    driver: bridge
