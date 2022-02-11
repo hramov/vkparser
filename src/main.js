@@ -1,7 +1,7 @@
 import pgPromise from "pg-promise";
 import express from 'express';
 import dotenv from 'dotenv';
-import { hashPassword } from "./utils/utils";
+import { hashPassword } from "./utils/utils.js";
 dotenv.config();
 
 async function main() {
