@@ -96,19 +96,22 @@ async function main() {
 
     app.get('/users', async (req, res) => {
         const users = await db.manyOrNone('select * from client');
-        return users;
+        res.status(200).json(users);
     });
 
     app.get('/data', async (req, res) => {
-        return await db.manyOrNone('select * from done');
+        const data = await db.manyOrNone('select * from done');
+        res.status(200).json(data);
     });
 
     app.get('/orders', async (req, res) => {
-        return await db.manyOrNone('select * from orders');
+        const orders = await db.manyOrNone('select * from orders');
+        res.status(200).json(orders);
     });
 
     app.get('/queue', async (req, res) => {
-        return await db.manyOrNone('select * from queue');
+        const queue = await db.manyOrNone('select * from queue');
+        res.status(200).json(queue);
     });
 
     app.get('/', async (req, res) => {
