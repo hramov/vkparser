@@ -10,7 +10,6 @@ async function main() {
     );
 
     const app = express();
-
     app.use(express.json());
 
     app.post('/', async (req, res) => {
@@ -70,6 +69,46 @@ async function main() {
                 }
             }
         }
+    });
+
+    app.post('/login', async (req, res) => {
+        if (!req.body.client || !req.body.client.email || !req.body.client.password) {
+            res.json({
+                status: false,
+                message: 'Client data is undefined'
+            });
+        } else {
+            const { email, password } = req.body.client;
+            const candidate = await db.oneOrNone(`select id from client where email = '${email}' and password='${password}'`);
+            if (candidate) {
+                res.status(200).json({
+                    id: candidate.id,
+                    token: ''
+                });
+            } else {
+                res.status(401).json({
+                    status: false,
+                    message: 'Unauthorized'
+                });
+            }
+        }
+    });
+
+    app.get('/users', async (req, res) => {
+        const users = await db.manyOrNone('select * from client');
+        return users;
+    });
+
+    app.get('/data', async (req, res) => {
+        return await db.manyOrNone('select * from done');
+    });
+
+    app.get('/orders', async (req, res) => {
+        return await db.manyOrNone('select * from orders');
+    });
+
+    app.get('/queue', async (req, res) => {
+        return await db.manyOrNone('select * from queue');
     });
 
     app.get('/', async (req, res) => {
