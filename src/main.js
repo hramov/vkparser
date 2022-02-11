@@ -1,6 +1,7 @@
 import pgPromise from "pg-promise";
 import express from 'express';
 import dotenv from 'dotenv';
+import { hashPassword } from "./utils/utils";
 dotenv.config();
 
 async function main() {
@@ -55,7 +56,7 @@ async function main() {
                     message: 'User is already registered!'
                 })
             } else {
-                const id = await db.query(`insert into client (email, password) values ('${email}', '${password}') returning id`);
+                const id = await db.query(`insert into client (email, password) values ('${email}', '${hashPassword(password)}') returning id`);
                 if (id[0].id) {
                     res.json({
                         status: true,
@@ -79,7 +80,7 @@ async function main() {
             });
         } else {
             const { email, password } = req.body.client;
-            const candidate = await db.oneOrNone(`select id from client where email = '${email}' and password='${password}'`);
+            const candidate = await db.oneOrNone(`select id from client where email = '${email}' and password='${hashPassword(password)}'`);
             if (candidate) {
                 res.status(200).json({
                     id: candidate.id,
@@ -97,6 +98,12 @@ async function main() {
     app.get('/users', async (req, res) => {
         const users = await db.manyOrNone('select * from client');
         res.status(200).json(users);
+    });
+
+    app.delete('/users/:id', async (req, res) => {
+        const id = Number(req.params.id);
+        const deleted = await db.oneOrNone(`delete from client where id = ${id}`);
+        res.status(200).json(deleted);
     });
 
     app.get('/data', async (req, res) => {
