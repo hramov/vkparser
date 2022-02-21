@@ -12,8 +12,10 @@ async function main() {
     );
 
     const app = express();
-    app.use(cors);
     app.use(express.json());
+    app.use(cors({
+        origin: '*'
+    }));
 
     app.post('/', async (req, res) => {
         const auth = req.headers.authorization;
@@ -44,6 +46,7 @@ async function main() {
     });
 
     app.post('/register', async (req, res) => {
+        console.log(123)
         if (!req.body.client || !req.body.client.email || !req.body.client.password) {
             res.json({
                 status: false,
