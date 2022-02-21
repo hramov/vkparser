@@ -2,7 +2,7 @@ import pgPromise from "pg-promise";
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import { hashPassword } from "./utils/utils.js";
+import { compare, genSalt, hash } from "bcrypt";
 dotenv.config();
 
 async function main() {
@@ -61,7 +61,9 @@ async function main() {
                     message: 'User is already registered!'
                 })
             } else {
-                const id = await db.query(`insert into client (email, password) values ('${email}', '${password}') returning id`);
+                const salt = await genSalt(10);
+                const hPassword = await hash(password, salt);
+                const id = await db.query(`insert into client (email, password) values ('${email}', '${hPassword}') returning id`);
                 if (id[0].id) {
                     res.json({
                         status: true,
@@ -85,10 +87,9 @@ async function main() {
             });
         } else {
             const { email, password } = req.body.client;
-            console.log(await hashPassword(password))
-            const candidate = await db.oneOrNone(`select id from client where email = '${email}' and password='${password}'`);
-            console.log(candidate);
-            if (candidate) {
+            const candidate = await db.oneOrNone(`select id, password from client where email = '${email}'`);
+            const validPassword = await compare(password, candidate.password);
+            if (validPassword) {
                 res.status(200).json({
                     id: candidate.id,
                     token: ''
