@@ -1,6 +1,7 @@
 import pgPromise from "pg-promise";
 import express from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors';
 import { hashPassword } from "./utils/utils.js";
 dotenv.config();
 
@@ -11,6 +12,7 @@ async function main() {
     );
 
     const app = express();
+    app.use(cors);
     app.use(express.json());
 
     app.post('/', async (req, res) => {
