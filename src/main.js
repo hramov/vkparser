@@ -46,7 +46,6 @@ async function main() {
     });
 
     app.post('/register', async (req, res) => {
-        console.log(123)
         if (!req.body.client || !req.body.client.email || !req.body.client.password) {
             res.json({
                 status: false,
