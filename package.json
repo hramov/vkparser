@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type": "module",
   "scripts": {
-    "start": "nodemon ./src/main.js"
+    "start": "tsc && node dist/main.js"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +23,8 @@
     "cors": "^2.8.5",
     "dotenv": "^14.3.2",
     "express": "^4.17.2",
-    "pg-promise": "^10.11.1"
+    "pg-promise": "^10.11.1",
+    "reflect-metadata": "^0.1.13",
+    "tsyringe": "^4.6.0"
   }
 }
