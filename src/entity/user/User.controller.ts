@@ -1,52 +1,30 @@
 import { Request, Response } from 'express';
-import { inject, injectable } from 'tsyringe';
+import { autoInjectable } from 'tsyringe';
+import { UserServiceReply } from './User.interface';
 import { UserService } from './User.service';
+import { RegisterValidation } from './User.validation';
 
+@autoInjectable()
 export class UserController {
-	constructor(
-		@inject('UserService') private readonly userService?: UserService,
-	) {}
+	constructor(private readonly userService: UserService) {}
 
 	async showUsers(req: Request, res: Response) {
-		const result = this.userService?.showUsers();
+		const result = this.userService.showUsers();
 		res.json(result);
 	}
 
 	async register(req: Request, res: Response) {
-		if (
-			!req.body.client ||
-			!req.body.client.email ||
-			!req.body.client.password
-		) {
-			res.json({
-				status: false,
-				message: 'Client data is undefined',
-			});
-		} else {
+		let result: UserServiceReply;
+		if (RegisterValidation(req.body.client)) {
 			const { email, password } = req.body.client;
-
-			// const candidate = await db.oneOrNone(`select * from client where email = '${email}'`);
-			// if (candidate) {
-			//     res.json({
-			//         status: false,
-			//         message: 'User is already registered!'
-			//     })
-			// } else {
-			//     const salt = await genSalt(10);
-			//     const hPassword = await hash(password, salt);
-			//     const id = await db.query(`insert into client (email, password) values ('${email}', '${hPassword}') returning id`);
-			//     if (id[0].id) {
-			//         res.json({
-			//             status: true,
-			//             message: 'User successfully registered!'
-			//         })
-			//     } else {
-			//         res.json({
-			//             status: false,
-			//             message: 'Some problems'
-			//         })
-			//     }
-			// }
+			result = await this.userService.register(email, password);
+			res.json(result);
+		} else {
+			result = {
+				status: false,
+				data: null,
+				error: new Error('Data is incorrect'),
+			};
 		}
 	}
 

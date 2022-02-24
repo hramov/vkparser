@@ -22,7 +22,6 @@ let Database = class Database {
 };
 Database = __decorate([
     (0, tsyringe_1.singleton)(),
-    (0, tsyringe_1.injectable)(),
     __metadata("design:paramtypes", [])
 ], Database);
 exports.Database = Database;

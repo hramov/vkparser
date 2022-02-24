@@ -1,13 +1,10 @@
 import { Router } from 'express';
+import { container } from 'tsyringe';
 import { UserController } from '../../entity/user/User.controller';
 
 export class UserRouter {
-	private readonly userController: UserController;
-	private readonly router: Router;
-	constructor() {
-		this.userController = new UserController();
-		this.router = Router();
-	}
+	private readonly userController = container.resolve(UserController);
+	private readonly router = Router();
 
 	init() {
 		this.router.post('/register', this.userController.register);

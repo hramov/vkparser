@@ -8,9 +8,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -29,15 +26,13 @@ let UserService = class UserService {
         this.database = database;
     }
     showUsers() {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            return (_a = this.database) === null || _a === void 0 ? void 0 : _a.instance.manyOrNone('SELECT * FROM CLIENT');
+            return this.database.instance.manyOrNone('SELECT * FROM CLIENT');
         });
     }
 };
 UserService = __decorate([
-    (0, tsyringe_1.injectable)(),
-    __param(0, (0, tsyringe_1.inject)('Database')),
+    (0, tsyringe_1.autoInjectable)(),
     __metadata("design:paramtypes", [database_connect_1.Database])
 ], UserService);
 exports.UserService = UserService;

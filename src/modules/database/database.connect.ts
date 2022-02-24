@@ -3,7 +3,6 @@ import pg from 'pg-promise/typescript/pg-subset';
 import { injectable, singleton } from 'tsyringe';
 
 @singleton()
-@injectable()
 export class Database {
 	public instance: pgPromise.IDatabase<{}, pg.IClient>;
 

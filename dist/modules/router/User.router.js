@@ -2,10 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserRouter = void 0;
 const express_1 = require("express");
+const tsyringe_1 = require("tsyringe");
 const User_controller_1 = require("../../entity/user/User.controller");
 class UserRouter {
     constructor() {
-        this.userController = new User_controller_1.UserController();
+        this.userController = tsyringe_1.container.resolve(User_controller_1.UserController);
         this.router = (0, express_1.Router)();
     }
     init() {
