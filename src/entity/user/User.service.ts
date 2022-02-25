@@ -2,6 +2,8 @@ import { autoInjectable, inject, injectable } from 'tsyringe';
 import { Database } from '../../modules/database/database.connect';
 import { UserServiceReply } from './User.interface';
 import { compare, genSalt, hash } from 'bcrypt';
+import { UserDto } from './User.dto';
+import { validateSync } from 'class-validator';
 
 @autoInjectable()
 export class UserService {
@@ -11,9 +13,17 @@ export class UserService {
 		return this.database.instance.manyOrNone('SELECT * FROM CLIENT');
 	}
 
-	async register(email: string, password: string): Promise<UserServiceReply> {
+	async register(user: UserDto): Promise<UserServiceReply> {
+		const errors = validateSync(user);
+		if (errors.length) {
+			return {
+				status: false,
+				data: null,
+				error: errors,
+			};
+		}
 		const candidate = await this.database.instance.oneOrNone(
-			`select * from client where email = '${email}'`,
+			`select * from client where email = '${user.email}'`,
 		);
 		if (candidate) {
 			return {
@@ -23,8 +33,10 @@ export class UserService {
 			};
 		} else {
 			const id = await this.database.instance.query(
-				`insert into client (email, password) values ('${email}', '${await hash(
-					password,
+				`insert into client (email, password) values ('${
+					user.email
+				}', '${await hash(
+					user.password,
 					await genSalt(10),
 				)}') returning id`,
 			);
@@ -44,11 +56,19 @@ export class UserService {
 		}
 	}
 
-	async login(email: string, password: string): Promise<UserServiceReply> {
+	async login(user: UserDto): Promise<UserServiceReply> {
+		const errors = validateSync(user);
+		if (errors.length) {
+			return {
+				status: false,
+				data: null,
+				error: errors,
+			};
+		}
 		const candidate = await this.database.instance.oneOrNone(
-			`select id, password from client where email = '${email}'`,
+			`select id, password from client where email = '${user.email}'`,
 		);
-		const validPassword = await compare(password, candidate.password);
+		const validPassword = await compare(user.password, candidate.password);
 		if (validPassword) {
 			return {
 				status: true,

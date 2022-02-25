@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { autoInjectable } from 'tsyringe';
+import { UserDto } from './User.dto';
 import { UserServiceReply } from './User.interface';
 import { UserService } from './User.service';
 import { RegisterValidation } from './User.validation';
@@ -16,8 +17,8 @@ export class UserController {
 	async register(req: Request, res: Response) {
 		let result: UserServiceReply;
 		if (RegisterValidation(req.body.client)) {
-			const { email, password } = req.body.client;
-			result = await this.userService.register(email, password);
+			const user = req.body.client;
+			result = await this.userService.register(user);
 		} else {
 			result = {
 				status: false,
@@ -31,8 +32,8 @@ export class UserController {
 	async login(req: Request, res: Response) {
 		let result: UserServiceReply;
 		if (RegisterValidation(req.body.client)) {
-			const { email, password } = req.body.client;
-			result = await this.userService.login(email, password);
+			const user: UserDto = req.body.client;
+			result = await this.userService.login(user);
 		} else {
 			result = {
 				status: false,
