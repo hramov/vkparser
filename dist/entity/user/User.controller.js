@@ -21,6 +21,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const tsyringe_1 = require("tsyringe");
 const User_service_1 = require("./User.service");
+const User_validation_1 = require("./User.validation");
 let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
@@ -33,16 +34,18 @@ let UserController = class UserController {
     }
     register(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!req.body.client ||
-                !req.body.client.email ||
-                !req.body.client.password) {
-                res.json({
-                    status: false,
-                    message: 'Client data is undefined',
-                });
+            let result;
+            if ((0, User_validation_1.RegisterValidation)(req.body.client)) {
+                const { email, password } = req.body.client;
+                result = yield this.userService.register(email, password);
+                res.json(result);
             }
             else {
-                const { email, password } = req.body.client;
+                result = {
+                    status: false,
+                    data: null,
+                    error: new Error('Data is incorrect'),
+                };
             }
         });
     }

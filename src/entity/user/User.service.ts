@@ -1,13 +1,13 @@
 import { autoInjectable, inject, injectable } from 'tsyringe';
 import { Database } from '../../modules/database/database.connect';
 import { UserServiceReply } from './User.interface';
-import { genSalt, hash } from 'bcrypt';
+import { compare, genSalt, hash } from 'bcrypt';
 
 @autoInjectable()
 export class UserService {
 	constructor(private readonly database: Database) {}
 
-	async showUsers() {
+	public async showUsers() {
 		return this.database.instance.manyOrNone('SELECT * FROM CLIENT');
 	}
 
@@ -42,5 +42,24 @@ export class UserService {
 				};
 			}
 		}
+	}
+
+	async login(email: string, password: string): Promise<UserServiceReply> {
+		const candidate = await this.database.instance.oneOrNone(
+			`select id, password from client where email = '${email}'`,
+		);
+		const validPassword = await compare(password, candidate.password);
+		if (validPassword) {
+			return {
+				status: true,
+				data: candidate.id,
+				error: null,
+			};
+		}
+		return {
+			status: false,
+			data: null,
+			error: new Error('Unauthorized'),
+		};
 	}
 }

@@ -8,7 +8,7 @@ import { RegisterValidation } from './User.validation';
 export class UserController {
 	constructor(private readonly userService: UserService) {}
 
-	async showUsers(req: Request, res: Response) {
+	public async showUsers(req: Request, res: Response) {
 		const result = this.userService.showUsers();
 		res.json(result);
 	}
@@ -18,7 +18,6 @@ export class UserController {
 		if (RegisterValidation(req.body.client)) {
 			const { email, password } = req.body.client;
 			result = await this.userService.register(email, password);
-			res.json(result);
 		} else {
 			result = {
 				status: false,
@@ -26,36 +25,22 @@ export class UserController {
 				error: new Error('Data is incorrect'),
 			};
 		}
+		res.json(result);
 	}
 
 	async login(req: Request, res: Response) {
-		if (
-			!req.body.client ||
-			!req.body.client.email ||
-			!req.body.client.password
-		) {
-			res.json({
-				status: false,
-				message: 'Client data is undefined',
-			});
-		} else {
+		let result: UserServiceReply;
+		if (RegisterValidation(req.body.client)) {
 			const { email, password } = req.body.client;
-			// const candidate = await db.oneOrNone(
-			// 	`select id, password from client where email = '${email}'`,
-			// );
-			// const validPassword = await compare(password, candidate.password);
-			// if (validPassword) {
-			// 	res.status(200).json({
-			// 		id: candidate.id,
-			// 		token: '',
-			// 	});
-			// } else {
-			// 	res.status(401).json({
-			// 		status: false,
-			// 		message: 'Unauthorized',
-			// 	});
-			// }
+			result = await this.userService.login(email, password);
+		} else {
+			result = {
+				status: false,
+				data: null,
+				error: new Error('Data is incorrect'),
+			};
 		}
+		res.json(result);
 	}
 
 	async delete(req: Request, res: Response) {

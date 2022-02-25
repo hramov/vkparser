@@ -21,6 +21,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
 const tsyringe_1 = require("tsyringe");
 const database_connect_1 = require("../../modules/database/database.connect");
+const bcrypt_1 = require("bcrypt");
 let UserService = class UserService {
     constructor(database) {
         this.database = database;
@@ -28,6 +29,35 @@ let UserService = class UserService {
     showUsers() {
         return __awaiter(this, void 0, void 0, function* () {
             return this.database.instance.manyOrNone('SELECT * FROM CLIENT');
+        });
+    }
+    register(email, password) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const candidate = yield this.database.instance.oneOrNone(`select * from client where email = '${email}'`);
+            if (candidate) {
+                return {
+                    status: false,
+                    data: null,
+                    error: new Error('User is already registered!'),
+                };
+            }
+            else {
+                const id = yield this.database.instance.query(`insert into client (email, password) values ('${email}', '${yield (0, bcrypt_1.hash)(password, yield (0, bcrypt_1.genSalt)(10))}') returning id`);
+                if (id[0].id) {
+                    return {
+                        status: true,
+                        data: id[0].id,
+                        error: null,
+                    };
+                }
+                else {
+                    return {
+                        status: false,
+                        data: null,
+                        error: new Error('Some problems'),
+                    };
+                }
+            }
         });
     }
 };
