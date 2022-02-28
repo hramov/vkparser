@@ -1,4 +1,4 @@
-import { signIn } from './handlers.js';
+import { signIn } from './handlers';
 import puppeteer from 'puppeteer';
 
 export class BrowserHandler {
@@ -11,7 +11,7 @@ export class BrowserHandler {
 			'--disable-setuid-sandbox',
 			'--no-sandbox',
 		],
-		headless: true,
+		headless: false,
 		ignoreHTTPSErrors: true,
 		ignoreDefaultArgs: ['--disable-extensions'],
 		slowMo: 50,
