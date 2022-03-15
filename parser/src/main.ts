@@ -13,13 +13,11 @@ export class Parser {
 	private page: Page;
 	private readonly browser: Browser;
 
-	constructor(private readonly database: Database) {}
+	constructor(private readonly database: Database) { }
 	async init() {
-		console.log('Start init');
 		const browser = new BrowserHandler();
 		await browser.init();
 		this.page = browser.getPage();
-		console.log('Init page');
 	}
 
 	private async storeGroups(groups: ResultDto[]) {
@@ -35,16 +33,16 @@ export class Parser {
 	}
 
 	private async proceedGroups(data: any, taken: string, groups: ResultDto[]) {
+		console.log('Storing results')
 		try {
 			await this.database.instance.query(
-				`SELECT * FROM add_to_done(${
-					data.order_id
-				}, '${taken}', '${JSON.stringify({
+				`SELECT * FROM add_to_done(${data.order_id
+				}, current_timestamp, '${JSON.stringify({
 					groups: groups,
 				})}')`,
 			);
 
-			await this.storeGroups(groups);
+			// await this.storeGroups(groups);
 		} catch (_err) {
 			const err = _err as Error;
 			console.log(err.message);
@@ -55,7 +53,7 @@ export class Parser {
 	}
 
 	private async getGroups(id: string, vkid: string) {
-		let groups: ResultDto[];
+		let groups: ResultDto[] = [];
 		try {
 			groups = await handler(this.page, vkid);
 		} catch (_err) {
@@ -65,6 +63,7 @@ export class Parser {
 				`update queue set taken = false where id = ${id}`,
 			);
 		}
+		return groups;
 	}
 
 	async proceed() {
@@ -76,16 +75,17 @@ export class Parser {
 					'select * from queue where taken = false limit 1',
 				);
 				if (data && data.id) {
-					const taken = new Date().toLocaleString(undefined, {
+					const taken = new Date().toLocaleString('fr-Ca', {
 						timeZone: 'Europe/London',
 					});
 					await this.database.instance.query(
 						`update queue set taken = true where id = ${data.id}`,
 					);
 					let groups: ResultDto[] = [];
-					await this.getGroups(data.id, data.vkid);
+					groups = await this.getGroups(data.id, data.vkid);
+
 					if (groups.length > 0) {
-						this.proceedGroups(data, taken, groups);
+						await this.proceedGroups(data, taken, groups);
 					}
 				}
 				isGo = true;

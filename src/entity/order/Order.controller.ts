@@ -4,7 +4,7 @@ import { OrderService } from './Order.service';
 
 @autoInjectable()
 export class OrderController {
-	constructor(private readonly orderService?: OrderService) {}
+	constructor(private readonly orderService?: OrderService) { }
 
 	async addOrder(req: Request, res: Response) {
 		const auth = req.headers.authorization;
@@ -30,5 +30,37 @@ export class OrderController {
 				status: 'Some problems',
 			});
 		}
+	}
+
+	async checkGroups(req: Request, res: Response) {
+		const auth = req.headers.authorization;
+		if (!auth) {
+			res.status(401).end('Unauthorized!');
+			return;
+		}
+		const vkid = req.body.vkid;
+		const groups = req.body.groups;
+
+		if (!vkid) {
+			res.json({
+				status: false,
+				message: 'VK id is empty',
+			});
+			return;
+		}
+
+		if (!groups.length) {
+			res.json({
+				status: false,
+				message: 'Groups is empty',
+			});
+			return;
+		}
+
+		const result = await this.orderService!.checkIntersection(auth, vkid, groups);
+		res.json({
+			status: result.status,
+			data: result.data
+		});
 	}
 }

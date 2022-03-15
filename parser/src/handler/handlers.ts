@@ -5,8 +5,8 @@ export async function signIn(browser: Browser, id: string) {
 	const page = await browser.newPage();
 	page.setDefaultTimeout(10000);
 	await page.goto(`https://vk.com/${id}`);
+	console.log(123)
 	await page.waitForTimeout(5000);
-
 	const emailInput = await page.$('input#quick_email');
 	await emailInput?.type(process.env.VK_EMAIL!);
 
@@ -43,14 +43,14 @@ export async function handler(page: Page, vkid: string): Promise<ResultDto[]> {
 		await groups?.click();
 		await page.waitForTimeout(2000);
 		const box = await page.$(
-			'#box_layer > div.popup_box_container > div > div.box_title_wrap.box_grey > div.box_title',
+			'#box_layer > div.popup_box_container > div > div.box_title_wrap.box_grey > div.box_title'
 		);
 		await box!.click();
 
 		await page.waitForTimeout(2000);
 
 		let groupsList: ElementHandle<Element>[] = await page.$$(
-			'div > div.fans_idol_info > div.fans_idol_name > a',
+			'#fans_rowsidols > div > div.fans_idol_info > div.fans_idol_name > a'
 		);
 		if (!groupsList || groupsList.length < 1) {
 			throw new Error('No groups');
@@ -89,6 +89,6 @@ export async function handler(page: Page, vkid: string): Promise<ResultDto[]> {
 	} catch (err) {
 		console.log(err);
 	}
-	console.log('Complete ' + vkid);
+	console.log('Complete ' + vkid + ' Found ' + groups_list_eval.length + ' groups');
 	return groups_list_eval;
 }

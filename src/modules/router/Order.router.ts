@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Request, Response, Router } from 'express';
 import { OrderController } from '../../entity/order/Order.controller';
 
 export class OrderRouter {
@@ -10,7 +10,7 @@ export class OrderRouter {
 	}
 
 	init() {
-		this.router.post('/', this.orderController.addOrder);
+		this.router.post('/', (req: Request, res: Response) => this.orderController.addOrder(req, res));
 		return this.router;
 	}
 }
