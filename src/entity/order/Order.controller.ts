@@ -4,7 +4,7 @@ import { OrderService } from './Order.service';
 
 @autoInjectable()
 export class OrderController {
-	constructor(private readonly orderService?: OrderService) { }
+	constructor(private readonly orderService?: OrderService) {}
 
 	async addOrder(req: Request, res: Response) {
 		const auth = req.headers.authorization;
@@ -20,7 +20,9 @@ export class OrderController {
 			});
 			return;
 		}
-		const result = await this.orderService!.addOrder(auth, vkid);
+		let groups = req.body.groups;
+		if (!groups) groups = [];
+		const result = await this.orderService!.addOrder(auth, vkid, groups);
 		if (result.status) {
 			res.json({
 				status: 'Added to queue',
@@ -57,10 +59,14 @@ export class OrderController {
 			return;
 		}
 
-		const result = await this.orderService!.checkIntersection(auth, vkid, groups);
+		const result = await this.orderService!.checkIntersection(
+			auth,
+			vkid,
+			groups,
+		);
 		res.json({
 			status: result.status,
-			data: result.data
+			data: result.data,
 		});
 	}
 }

@@ -1,4 +1,4 @@
-create or replace function add_to_queue(client_id integer, vkid varchar) 
+create or replace function add_to_queue(client_id integer, vkid varchar, groups jsonb) 
 returns integer
 as
 $$
@@ -10,7 +10,7 @@ $$
         if _parse_id <> 0 then
             insert into orders (client_id, parse_id) values (client_id, _parse_id) returning id into _order_id;
             if _order_id <> 0 then
-                insert into queue (order_id, vkid) values (_order_id, vkid);
+                insert into queue (order_id, vkid, groups) values (_order_id, vkid, groups);
             else
                 return 0;
             end if;

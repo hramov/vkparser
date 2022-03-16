@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { handler } from './handler/handlers';
+import { checkIfUserInGroups, getUsersGroup } from './handler/handlers';
 import dotenv from 'dotenv';
 import { ResultDto } from './dto/result.dto';
 import { Browser, Page } from 'puppeteer';
@@ -13,7 +13,7 @@ export class Parser {
 	private page: Page;
 	private readonly browser: Browser;
 
-	constructor(private readonly database: Database) { }
+	constructor(private readonly database: Database) {}
 	async init() {
 		const browser = new BrowserHandler();
 		await browser.init();
@@ -32,11 +32,12 @@ export class Parser {
 		}
 	}
 
-	private async proceedGroups(data: any, taken: string, groups: ResultDto[]) {
-		console.log('Storing results')
+	private async proceedGroups(data: any, taken: string, groups: string[]) {
+		console.log('Storing results');
 		try {
 			await this.database.instance.query(
-				`SELECT * FROM add_to_done(${data.order_id
+				`SELECT * FROM add_to_done(${
+					data.order_id
 				}, current_timestamp, '${JSON.stringify({
 					groups: groups,
 				})}')`,
@@ -53,9 +54,9 @@ export class Parser {
 	}
 
 	private async getGroups(id: string, vkid: string) {
-		let groups: ResultDto[] = [];
+		let groups: string[] = [];
 		try {
-			groups = await handler(this.page, vkid);
+			groups = await getUsersGroup(this.page, vkid);
 		} catch (_err) {
 			const err = _err as Error;
 			console.log(err.message);
@@ -64,6 +65,24 @@ export class Parser {
 			);
 		}
 		return groups;
+	}
+
+	private async getUserInGroups(id: string, vkid: string, groups: string[]) {
+		let result: string[] = [];
+		try {
+			result = (await checkIfUserInGroups(
+				this.page,
+				vkid,
+				groups,
+			)) as string[];
+		} catch (_err) {
+			const err = _err as Error;
+			console.log(err.message);
+			await this.database.instance.query(
+				`update queue set taken = false where id = ${id}`,
+			);
+		}
+		return result;
 	}
 
 	async proceed() {
@@ -81,12 +100,18 @@ export class Parser {
 					await this.database.instance.query(
 						`update queue set taken = true where id = ${data.id}`,
 					);
-					let groups: ResultDto[] = [];
-					groups = await this.getGroups(data.id, data.vkid);
 
-					if (groups.length > 0) {
-						await this.proceedGroups(data, taken, groups);
-					}
+					const groups = await this.getGroups(data.id, data.vkid);
+					const userInGroups = await this.getUserInGroups(
+						data.id,
+						data.vkid,
+						data.groups,
+					);
+
+					const result = groups.filter((group: string) =>
+						userInGroups.includes(group),
+					);
+					await this.proceedGroups(data, taken, result);
 				}
 				isGo = true;
 			}

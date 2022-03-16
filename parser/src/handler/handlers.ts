@@ -1,11 +1,9 @@
 import { Browser, ElementHandle, Page } from 'puppeteer';
-import { ResultDto } from '../dto/result.dto';
 
 export async function signIn(browser: Browser, id: string) {
 	const page = await browser.newPage();
 	page.setDefaultTimeout(10000);
 	await page.goto(`https://vk.com/${id}`);
-	console.log(123)
 	await page.waitForTimeout(5000);
 	const emailInput = await page.$('input#quick_email');
 	await emailInput?.type(process.env.VK_EMAIL!);
@@ -22,7 +20,49 @@ export async function signIn(browser: Browser, id: string) {
 	return page;
 }
 
-export async function handler(page: Page, vkid: string): Promise<ResultDto[]> {
+export async function checkIfUserInGroup(
+	page: Page,
+	vkid: string,
+	url: string,
+) {
+	await page.goto(url);
+	await page.waitForTimeout(2000);
+	const folowers = await page.$(
+		'#public_followers > a > div > span.header_label.fl_l',
+	);
+	folowers?.click();
+	await page.waitForTimeout(2000);
+	const search = await page.$('#tb_tabsc0fc05e3 > div > h2 > ul > a');
+	search?.click();
+	await page.waitForTimeout(2000);
+	const input = await page.$('#search_query');
+	await input?.type(vkid);
+	await page.keyboard.press('Enter');
+	await page.waitForTimeout(2000);
+	const users = await page.$$('#results > div');
+	if (users && users?.length > 0) {
+		return url;
+	}
+	return null;
+}
+
+export async function checkIfUserInGroups(
+	page: Page,
+	vkid: string,
+	groups: string[],
+) {
+	const result: (string | null)[] = [];
+	for (let i = 0; i < groups.length; i++) {
+		const url = groups[i];
+		result.push(await checkIfUserInGroup(page, vkid, url));
+	}
+	return result.filter((group: string | null) => group);
+}
+
+export async function getUsersGroup(
+	page: Page,
+	vkid: string,
+): Promise<string[]> {
 	const groups_list_eval = [];
 	try {
 		await page.goto(`https://vk.com/${vkid}`);
@@ -43,14 +83,14 @@ export async function handler(page: Page, vkid: string): Promise<ResultDto[]> {
 		await groups?.click();
 		await page.waitForTimeout(2000);
 		const box = await page.$(
-			'#box_layer > div.popup_box_container > div > div.box_title_wrap.box_grey > div.box_title'
+			'#box_layer > div.popup_box_container > div > div.box_title_wrap.box_grey > div.box_title',
 		);
 		await box!.click();
 
 		await page.waitForTimeout(2000);
 
 		let groupsList: ElementHandle<Element>[] = await page.$$(
-			'#fans_rowsidols > div > div.fans_idol_info > div.fans_idol_name > a'
+			'#fans_rowsidols > div > div.fans_idol_info > div.fans_idol_name > a',
 		);
 		if (!groupsList || groupsList.length < 1) {
 			throw new Error('No groups');
@@ -81,14 +121,13 @@ export async function handler(page: Page, vkid: string): Promise<ResultDto[]> {
 				groupsList[i],
 			);
 
-			groups_list_eval.push({
-				title: title,
-				href: `https://vk.com${href}`,
-			});
+			groups_list_eval.push(`https://vk.com${href}`);
 		}
 	} catch (err) {
 		console.log(err);
 	}
-	console.log('Complete ' + vkid + ' Found ' + groups_list_eval.length + ' groups');
+	console.log(
+		'Complete ' + vkid + ' Found ' + groups_list_eval.length + ' groups',
+	);
 	return groups_list_eval;
 }
