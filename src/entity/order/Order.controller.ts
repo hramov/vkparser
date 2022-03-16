@@ -69,4 +69,11 @@ export class OrderController {
 			data: result.data,
 		});
 	}
+
+	async clear(req: Request, res: Response) {
+		const result = await this.orderService!.clear();
+		res.json({
+			status: true,
+		});
+	}
 }

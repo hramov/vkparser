@@ -4,7 +4,7 @@ export async function signIn(browser: Browser, id: string) {
 	const page = await browser.newPage();
 	page.setDefaultTimeout(10000);
 	await page.goto(`https://vk.com/${id}`);
-	await page.waitForTimeout(5000);
+	await page.waitForTimeout(2000);
 	const emailInput = await page.$('input#quick_email');
 	await emailInput?.type(process.env.VK_EMAIL!);
 
@@ -32,15 +32,16 @@ export async function checkIfUserInGroup(
 	);
 	folowers?.click();
 	await page.waitForTimeout(2000);
-	const search = await page.$('#tb_tabsc0fc05e3 > div > h2 > ul > a');
+	const search = await page.$('div > h2 > ul > a');
+	if (!search) console.log('No search found');
 	search?.click();
 	await page.waitForTimeout(2000);
 	const input = await page.$('#search_query');
 	await input?.type(vkid);
 	await page.keyboard.press('Enter');
 	await page.waitForTimeout(2000);
-	const users = await page.$$('#results > div');
-	if (users && users?.length > 0) {
+	const user = await page.$$('#results > div');
+	if (user && user.length > 0) {
 		return url;
 	}
 	return null;
@@ -52,9 +53,11 @@ export async function checkIfUserInGroups(
 	groups: string[],
 ) {
 	const result: (string | null)[] = [];
+
+	console.log(groups);
 	for (let i = 0; i < groups.length; i++) {
-		const url = groups[i];
-		result.push(await checkIfUserInGroup(page, vkid, url));
+		console.log(groups[i]);
+		result.push(await checkIfUserInGroup(page, vkid, groups[i]));
 	}
 	return result.filter((group: string | null) => group);
 }

@@ -1,6 +1,6 @@
 import pgPromise from 'pg-promise';
 import pg from 'pg-promise/typescript/pg-subset';
-import { injectable, singleton } from 'tsyringe';
+import { singleton } from 'tsyringe';
 
 @singleton()
 export class Database {

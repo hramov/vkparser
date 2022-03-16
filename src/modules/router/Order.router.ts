@@ -10,7 +10,12 @@ export class OrderRouter {
 	}
 
 	init() {
-		this.router.post('/', (req: Request, res: Response) => this.orderController.addOrder(req, res));
+		this.router.post('/', (req: Request, res: Response) =>
+			this.orderController.addOrder(req, res),
+		);
+		this.router.get('/clear', (req: Request, res: Response) =>
+			this.orderController.clear(req, res),
+		);
 		return this.router;
 	}
 }

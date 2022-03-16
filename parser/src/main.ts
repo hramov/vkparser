@@ -68,13 +68,9 @@ export class Parser {
 	}
 
 	private async getUserInGroups(id: string, vkid: string, groups: string[]) {
-		let result: string[] = [];
+		let result: (string | null)[] = [];
 		try {
-			result = (await checkIfUserInGroups(
-				this.page,
-				vkid,
-				groups,
-			)) as string[];
+			result = await checkIfUserInGroups(this.page, vkid, groups)!;
 		} catch (_err) {
 			const err = _err as Error;
 			console.log(err.message);
@@ -102,15 +98,17 @@ export class Parser {
 					);
 
 					const groups = await this.getGroups(data.id, data.vkid);
+
 					const userInGroups = await this.getUserInGroups(
 						data.id,
 						data.vkid,
 						data.groups,
 					);
-
+					console.log(userInGroups);
 					const result = groups.filter((group: string) =>
 						userInGroups.includes(group),
 					);
+
 					await this.proceedGroups(data, taken, result);
 				}
 				isGo = true;

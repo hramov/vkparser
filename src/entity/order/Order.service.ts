@@ -9,12 +9,12 @@ export class OrderService {
 	async addOrder(
 		auth: string,
 		vkid: string,
-		groups: string[],
+		groups: string,
 	): Promise<OrderServiceReply> {
 		const result = await this.database!.instance.query(
-			`SELECT * FROM  add_to_queue(${Number(
-				auth,
-			)}, '${vkid}', '${JSON.stringify(groups)}') as status`,
+			`SELECT * FROM  add_to_queue(${auth}, '${vkid}', '${JSON.stringify(
+				groups,
+			)}') as status`,
 		);
 
 		return {
@@ -48,5 +48,11 @@ export class OrderService {
 			data: result,
 			error: null,
 		};
+	}
+
+	async clear() {
+		await this.database!.instance.query('DELETE FROM queue');
+		await this.database!.instance.query('DELETE FROM orders');
+		await this.database!.instance.query('DELETE FROM parse');
 	}
 }
