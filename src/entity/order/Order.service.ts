@@ -50,6 +50,12 @@ export class OrderService {
 		};
 	}
 
+	async getResultsForOrder(order_id: number) {
+		return await this.database!.instance.oneOrNone(
+			`SELECT data FROM done where order_id = ${order_id}`,
+		);
+	}
+
 	async clear() {
 		await this.database!.instance.query('DELETE FROM queue');
 		await this.database!.instance.query('DELETE FROM orders');

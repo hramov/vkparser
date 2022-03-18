@@ -13,12 +13,13 @@ $$
         else
             update queue set processed_at = current_timestamp where vkid = _vkid;
             _client_id := (select client_id from orders where id = order_id);
-            insert into done(vkid, taken_at, done_at, data, client_id) values (
+            insert into done(vkid, taken_at, done_at, data, client_id, order_id) values (
                 _vkid,
                 taken_at,
                 current_timestamp,
                 result,
-                _client_id
+                _client_id,
+                order_id
             ) returning id into _done_id;
             if _done_id = 0 then
                 return false;

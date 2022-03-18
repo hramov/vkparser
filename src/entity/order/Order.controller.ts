@@ -6,6 +6,14 @@ import { OrderService } from './Order.service';
 export class OrderController {
 	constructor(private readonly orderService?: OrderService) {}
 
+	async checkIsDone(order_id: number): Promise<any> {
+		const result = await this.orderService!.getResultsForOrder(order_id);
+		if (result && result.status) {
+			return result.data;
+		}
+		return null;
+	}
+
 	async addOrder(req: Request, res: Response) {
 		const auth = req.headers.authorization;
 		if (!auth) {
@@ -24,11 +32,25 @@ export class OrderController {
 		if (!groups) groups = [];
 		const result = await this.orderService!.addOrder(auth, vkid, groups);
 		if (result.status) {
-			res.json({
-				status: 'Added to queue',
+			res.write(
+				JSON.stringify({
+					status: 'Added to queue',
+				}),
+			);
+
+			setInterval(async () => {
+				const data = await this.checkIsDone(result.data.status);
+				if (data) res.end(JSON.stringify(data));
 			});
+			setTimeout(() => {
+				res.end(
+					JSON.stringify({
+						status: 'Some problems',
+					}),
+				);
+			}, 30000);
 		} else {
-			res.json({
+			res.send({
 				status: 'Some problems',
 			});
 		}

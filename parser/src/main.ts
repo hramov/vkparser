@@ -104,7 +104,6 @@ export class Parser {
 						data.vkid,
 						data.groups,
 					);
-					console.log(userInGroups);
 					const result = groups.filter((group: string) =>
 						userInGroups.includes(group),
 					);
