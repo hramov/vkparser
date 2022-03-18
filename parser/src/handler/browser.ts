@@ -11,10 +11,9 @@ export class BrowserHandler {
 			'--disable-setuid-sandbox',
 			'--no-sandbox',
 		],
-		headless: false,
+		headless: true,
 		ignoreHTTPSErrors: true,
 		ignoreDefaultArgs: ['--disable-extensions'],
-		slowMo: 50,
 	};
 
 	private browser: puppeteer.Browser;

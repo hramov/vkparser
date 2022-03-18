@@ -54,9 +54,7 @@ export async function checkIfUserInGroups(
 ) {
 	const result: (string | null)[] = [];
 
-	console.log(groups);
 	for (let i = 0; i < groups.length; i++) {
-		console.log(groups[i]);
 		result.push(await checkIfUserInGroup(page, vkid, groups[i]));
 	}
 	return result.filter((group: string | null) => group);
@@ -129,8 +127,5 @@ export async function getUsersGroup(
 	} catch (err) {
 		console.log(err);
 	}
-	console.log(
-		'Complete ' + vkid + ' Found ' + groups_list_eval.length + ' groups',
-	);
 	return groups_list_eval;
 }

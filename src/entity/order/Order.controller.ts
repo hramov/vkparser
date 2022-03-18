@@ -6,12 +6,14 @@ import { OrderService } from './Order.service';
 export class OrderController {
 	constructor(private readonly orderService?: OrderService) {}
 
-	async checkIsDone(order_id: number): Promise<any> {
-		const result = await this.orderService!.getResultsForOrder(order_id);
-		if (result && result.status) {
-			return result.data;
+	async checkIsDone(req: Request, res: Response): Promise<any> {
+		const result = await this.orderService!.getResultsForOrder(
+			req.body.order_id,
+		);
+		if (result && result.id) {
+			res.status(200).json(result);
 		}
-		return null;
+		return res.status(200).end(null);
 	}
 
 	async addOrder(req: Request, res: Response) {
@@ -31,29 +33,12 @@ export class OrderController {
 		let groups = req.body.groups;
 		if (!groups) groups = [];
 		const result = await this.orderService!.addOrder(auth, vkid, groups);
-		if (result.status) {
-			res.write(
-				JSON.stringify({
-					status: 'Added to queue',
-				}),
-			);
-
-			setInterval(async () => {
-				const data = await this.checkIsDone(result.data.status);
-				if (data) res.end(JSON.stringify(data));
-			});
-			setTimeout(() => {
-				res.end(
-					JSON.stringify({
-						status: 'Some problems',
-					}),
-				);
-			}, 30000);
-		} else {
-			res.send({
-				status: 'Some problems',
-			});
-		}
+		if (result.error) res.status(500).json(result);
+		res.status(200).json({
+			status: result.status,
+			error: result.error,
+			order_id: result.data.status,
+		});
 	}
 
 	async checkGroups(req: Request, res: Response) {

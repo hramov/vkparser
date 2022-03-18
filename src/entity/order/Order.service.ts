@@ -51,9 +51,10 @@ export class OrderService {
 	}
 
 	async getResultsForOrder(order_id: number) {
-		return await this.database!.instance.oneOrNone(
-			`SELECT data FROM done where order_id = ${order_id}`,
+		const result = await this.database!.instance.oneOrNone(
+			`SELECT * FROM done where order_id = ${order_id}`,
 		);
+		return result;
 	}
 
 	async clear() {

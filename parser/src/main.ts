@@ -32,7 +32,7 @@ export class Parser {
 		}
 	}
 
-	private async proceedGroups(data: any, taken: string, groups: string[]) {
+	private async proceedGroups(data: any, taken: Date, groups: string[]) {
 		console.log('Storing results');
 		try {
 			await this.database.instance.query(
@@ -42,8 +42,26 @@ export class Parser {
 					groups: groups,
 				})}')`,
 			);
-
-			// await this.storeGroups(groups);
+			const stored = await this.database.instance.oneOrNone(
+				`SELECT * FROM done WHERE order_id = ${data.order_id}`,
+			);
+			console.table({
+				id: stored.id,
+				vkid: stored.vkid,
+				client_id: stored.client_id,
+				order_id: stored.order_id,
+				data: stored.data.groups,
+			});
+			if (stored.order_id != data.order_id) {
+				console.log('Order ids are incompatible');
+			}
+			console.log(
+				'Complete ' +
+					stored.vkid +
+					' Found ' +
+					stored.data.groups.length +
+					' groups',
+			);
 		} catch (_err) {
 			const err = _err as Error;
 			console.log(err.message);
@@ -86,29 +104,30 @@ export class Parser {
 		setInterval(async () => {
 			if (isGo) {
 				isGo = false;
-				const data = await this.database.instance.oneOrNone(
-					'select * from queue where taken = false limit 1',
-				);
-				if (data && data.id) {
-					const taken = new Date().toLocaleString('fr-Ca', {
-						timeZone: 'Europe/London',
-					});
-					await this.database.instance.query(
-						`update queue set taken = true where id = ${data.id}`,
+				if (this.page) {
+					const data = await this.database.instance.oneOrNone(
+						'select * from queue where taken = false limit 1',
 					);
+					if (data && data.id) {
+						console.log(`Start parsing ${data.vkid}`);
+						const taken = new Date();
+						await this.database.instance.query(
+							`update queue set taken = true where id = ${data.id}`,
+						);
 
-					const groups = await this.getGroups(data.id, data.vkid);
+						const groups = await this.getGroups(data.id, data.vkid);
 
-					const userInGroups = await this.getUserInGroups(
-						data.id,
-						data.vkid,
-						data.groups,
-					);
-					const result = groups.filter((group: string) =>
-						userInGroups.includes(group),
-					);
+						const userInGroups = await this.getUserInGroups(
+							data.id,
+							data.vkid,
+							data.groups,
+						);
+						const result = groups.filter((group: string) =>
+							userInGroups.includes(group),
+						);
 
-					await this.proceedGroups(data, taken, result);
+						await this.proceedGroups(data, taken, result);
+					}
 				}
 				isGo = true;
 			}
