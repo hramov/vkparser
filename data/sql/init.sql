@@ -777,7 +777,7 @@ $$;
 ALTER FUNCTION public.add_to_done(order_id integer, taken_at timestamp with time zone, result jsonb) OWNER TO database_admin;
 
 --
--- Name: add_to_queue(integer, character varying); Type: FUNCTION; Schema: public; Owner: database_admin
+-- Name: add_to_queue(integer, character varying, groups jsonb); Type: FUNCTION; Schema: public; Owner: database_admin
 --
 
 CREATE FUNCTION public.add_to_queue(client_id integer, vkid character varying, groups jsonb) RETURNS integer
@@ -803,7 +803,7 @@ CREATE FUNCTION public.add_to_queue(client_id integer, vkid character varying, g
 $$;
 
 
-ALTER FUNCTION public.add_to_queue(client_id integer, vkid character varying) OWNER TO database_admin;
+ALTER FUNCTION public.add_to_queue(client_id integer, vkid character varying, groups jsonb) OWNER TO database_admin;
 
 SET default_tablespace = '';
 
