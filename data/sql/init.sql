@@ -780,7 +780,7 @@ ALTER FUNCTION public.add_to_done(order_id integer, taken_at timestamp with time
 -- Name: add_to_queue(integer, character varying); Type: FUNCTION; Schema: public; Owner: database_admin
 --
 
-CREATE FUNCTION public.add_to_queue(client_id integer, vkid character varying) RETURNS integer
+CREATE FUNCTION public.add_to_queue(client_id integer, vkid character varying, groups jsonb) RETURNS integer
     LANGUAGE plpgsql
     AS $$
     declare
@@ -791,7 +791,7 @@ CREATE FUNCTION public.add_to_queue(client_id integer, vkid character varying) R
         if _parse_id <> 0 then
             insert into orders (client_id, parse_id) values (client_id, _parse_id) returning id into _order_id;
             if _order_id <> 0 then
-                insert into queue (order_id, vkid) values (_order_id, vkid);
+                insert into queue (order_id, vkid, groups) values (_order_id, vkid, groups);
             else
                 return 0;
             end if;
@@ -1000,7 +1000,8 @@ CREATE TABLE public.queue (
     added_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     taken boolean DEFAULT false NOT NULL,
     order_id integer,
-    vkid character varying NOT NULL
+    vkid character varying NOT NULL,
+    groups jsonb
 );
 
 
