@@ -36,9 +36,8 @@ let UserController = class UserController {
         return __awaiter(this, void 0, void 0, function* () {
             let result;
             if ((0, User_validation_1.RegisterValidation)(req.body.client)) {
-                const { email, password } = req.body.client;
-                result = yield this.userService.register(email, password);
-                res.json(result);
+                const user = req.body.client;
+                result = yield this.userService.register(user);
             }
             else {
                 result = {
@@ -47,21 +46,24 @@ let UserController = class UserController {
                     error: new Error('Data is incorrect'),
                 };
             }
+            res.json(result);
         });
     }
     login(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!req.body.client ||
-                !req.body.client.email ||
-                !req.body.client.password) {
-                res.json({
-                    status: false,
-                    message: 'Client data is undefined',
-                });
+            let result;
+            if ((0, User_validation_1.RegisterValidation)(req.body.client)) {
+                const user = req.body.client;
+                result = yield this.userService.login(user);
             }
             else {
-                const { email, password } = req.body.client;
+                result = {
+                    status: false,
+                    data: null,
+                    error: new Error('Data is incorrect'),
+                };
             }
+            res.json(result);
         });
     }
     delete(req, res) {

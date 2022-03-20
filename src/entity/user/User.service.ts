@@ -1,4 +1,4 @@
-import { autoInjectable, inject, injectable } from 'tsyringe';
+import { autoInjectable } from 'tsyringe';
 import { Database } from '../../modules/database/database.connect';
 import { UserServiceReply } from './User.interface';
 import { compare, genSalt, hash } from 'bcrypt';

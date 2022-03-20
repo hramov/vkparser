@@ -25,6 +25,15 @@ let OrderController = class OrderController {
     constructor(orderService) {
         this.orderService = orderService;
     }
+    checkIsDone(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield this.orderService.getResultsForOrder(req.body.order_id);
+            if (result && result.id) {
+                res.status(200).json(result);
+            }
+            return res.status(200).end(null);
+        });
+    }
     addOrder(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const auth = req.headers.authorization;
@@ -40,17 +49,55 @@ let OrderController = class OrderController {
                 });
                 return;
             }
-            const result = yield this.orderService.addOrder(auth, vkid);
-            if (result.status) {
-                res.json({
-                    status: 'Added to queue',
-                });
+            let groups = req.body.groups;
+            if (!groups)
+                groups = [];
+            const result = yield this.orderService.addOrder(auth, vkid, groups);
+            if (result.error)
+                res.status(500).json(result);
+            res.status(200).json({
+                status: result.status,
+                error: result.error,
+                order_id: result.data.status,
+            });
+        });
+    }
+    checkGroups(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const auth = req.headers.authorization;
+            if (!auth) {
+                res.status(401).end('Unauthorized!');
+                return;
             }
-            else {
+            const vkid = req.body.vkid;
+            const groups = req.body.groups;
+            if (!vkid) {
                 res.json({
-                    status: 'Some problems',
+                    status: false,
+                    message: 'VK id is empty',
                 });
+                return;
             }
+            if (!groups.length) {
+                res.json({
+                    status: false,
+                    message: 'Groups is empty',
+                });
+                return;
+            }
+            const result = yield this.orderService.checkIntersection(auth, vkid, groups);
+            res.json({
+                status: result.status,
+                data: result.data,
+            });
+        });
+    }
+    clear(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield this.orderService.clear();
+            res.json({
+                status: true,
+            });
         });
     }
 };

@@ -5,5 +5,6 @@ function RegisterValidation(client) {
     if (!client || !client.email || !client.password) {
         return false;
     }
+    return true;
 }
 exports.RegisterValidation = RegisterValidation;

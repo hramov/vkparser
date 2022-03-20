@@ -11,10 +11,10 @@
 	"license": "ISC",
 	"devDependencies": {
 		"@types/bcrypt": "^5.0.0",
-		"nodemon": "^2.0.15",
-		"ts-node": "^10.7.0"
+		"nodemon": "^2.0.15"
 	},
 	"dependencies": {
+		"ts-node": "^10.7.0",
 		"@types/axios": "^0.14.0",
 		"@types/cors": "^2.8.12",
 		"@types/dotenv": "^8.2.0",

@@ -10,10 +10,10 @@ class UserRouter {
         this.router = (0, express_1.Router)();
     }
     init() {
-        this.router.post('/register', this.userController.register);
-        this.router.post('/login', this.userController.login);
-        this.router.delete('/:id', this.userController.delete);
-        this.router.get('/', this.userController.showUsers);
+        this.router.post('/register', (req, res) => this.userController.register(req, res));
+        this.router.post('/login', (req, res) => this.userController.login(req, res));
+        this.router.delete('/:id', (req, res) => this.userController.delete(req, res));
+        this.router.get('/', (req, res) => this.userController.showUsers(req, res));
         return this.router;
     }
 }

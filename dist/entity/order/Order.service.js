@@ -25,14 +25,41 @@ let OrderService = class OrderService {
     constructor(database) {
         this.database = database;
     }
-    addOrder(auth, vkid) {
+    addOrder(auth, vkid, groups) {
         return __awaiter(this, void 0, void 0, function* () {
-            const result = yield this.database.instance.query(`SELECT * FROM  add_to_queue(${Number(auth)}, '${vkid}') as status`);
+            const result = yield this.database.instance.query(`SELECT * FROM  add_to_queue(${auth}, '${vkid}', '${JSON.stringify(groups)}') as status`);
             return {
                 status: true,
                 data: result[0],
                 error: null,
             };
+        });
+    }
+    checkIntersection(auth, vkid, groups) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const foundGroupsRow = yield this.database.instance.manyOrNone(`SELECT data FROM done where client_id = ${Number(auth)} and vkid = '${vkid}'`);
+            const foundGroups = [];
+            foundGroupsRow.forEach((data) => foundGroups.push(...data.groups));
+            const result = [];
+            foundGroups.forEach((group) => groups.includes(group) ? result.push(group) : null);
+            return {
+                status: true,
+                data: result,
+                error: null,
+            };
+        });
+    }
+    getResultsForOrder(order_id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield this.database.instance.oneOrNone(`SELECT * FROM done where order_id = ${order_id}`);
+            return result;
+        });
+    }
+    clear() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.database.instance.query('DELETE FROM queue');
+            yield this.database.instance.query('DELETE FROM orders');
+            yield this.database.instance.query('DELETE FROM parse');
         });
     }
 };

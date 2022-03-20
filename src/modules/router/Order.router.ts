@@ -1,13 +1,10 @@
 import { Request, Response, Router } from 'express';
+import { container } from 'tsyringe';
 import { OrderController } from '../../entity/order/Order.controller';
 
 export class OrderRouter {
-	private readonly orderController: OrderController;
-	private readonly router: Router;
-	constructor() {
-		this.orderController = new OrderController();
-		this.router = Router();
-	}
+	private readonly orderController = container.resolve(OrderController);
+	private readonly router = Router();
 
 	init() {
 		this.router.post(

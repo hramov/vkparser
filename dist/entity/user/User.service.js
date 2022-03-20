@@ -22,6 +22,7 @@ exports.UserService = void 0;
 const tsyringe_1 = require("tsyringe");
 const database_connect_1 = require("../../modules/database/database.connect");
 const bcrypt_1 = require("bcrypt");
+const class_validator_1 = require("class-validator");
 let UserService = class UserService {
     constructor(database) {
         this.database = database;
@@ -31,9 +32,17 @@ let UserService = class UserService {
             return this.database.instance.manyOrNone('SELECT * FROM CLIENT');
         });
     }
-    register(email, password) {
+    register(user) {
         return __awaiter(this, void 0, void 0, function* () {
-            const candidate = yield this.database.instance.oneOrNone(`select * from client where email = '${email}'`);
+            const errors = (0, class_validator_1.validateSync)(user);
+            if (errors.length) {
+                return {
+                    status: false,
+                    data: null,
+                    error: errors,
+                };
+            }
+            const candidate = yield this.database.instance.oneOrNone(`select * from client where email = '${user.email}'`);
             if (candidate) {
                 return {
                     status: false,
@@ -42,7 +51,7 @@ let UserService = class UserService {
                 };
             }
             else {
-                const id = yield this.database.instance.query(`insert into client (email, password) values ('${email}', '${yield (0, bcrypt_1.hash)(password, yield (0, bcrypt_1.genSalt)(10))}') returning id`);
+                const id = yield this.database.instance.query(`insert into client (email, password) values ('${user.email}', '${yield (0, bcrypt_1.hash)(user.password, yield (0, bcrypt_1.genSalt)(10))}') returning id`);
                 if (id[0].id) {
                     return {
                         status: true,
@@ -58,6 +67,32 @@ let UserService = class UserService {
                     };
                 }
             }
+        });
+    }
+    login(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const errors = (0, class_validator_1.validateSync)(user);
+            if (errors.length) {
+                return {
+                    status: false,
+                    data: null,
+                    error: errors,
+                };
+            }
+            const candidate = yield this.database.instance.oneOrNone(`select id, password from client where email = '${user.email}'`);
+            const validPassword = yield (0, bcrypt_1.compare)(user.password, candidate.password);
+            if (validPassword) {
+                return {
+                    status: true,
+                    data: candidate.id,
+                    error: null,
+                };
+            }
+            return {
+                status: false,
+                data: null,
+                error: new Error('Unauthorized'),
+            };
         });
     }
 };

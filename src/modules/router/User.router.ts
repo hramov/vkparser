@@ -1,7 +1,6 @@
 import { Request, Response, Router } from 'express';
 import { container } from 'tsyringe';
 import { UserController } from '../../entity/user/User.controller';
-
 export class UserRouter {
 	private readonly userController = container.resolve(UserController);
 	private readonly router = Router();
