@@ -20,7 +20,7 @@ async function signIn(browser, id) {
     await page.waitForTimeout(2000);
     const loginButton = await page.$(selector_1.selectors.LOGIN_BUTTON);
     await (loginButton === null || loginButton === void 0 ? void 0 : loginButton.click());
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(4000);
     if (await page.$(selector_1.selectors.CHECK_ELEMENT)) {
         console.log('Parser signed in');
         return page;

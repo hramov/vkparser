@@ -25,7 +25,7 @@ export async function signIn(browser: Browser, id: string) {
 
 	const loginButton = await page.$(selectors.LOGIN_BUTTON);
 	await loginButton?.click();
-	await page.waitForTimeout(2000);
+	await page.waitForTimeout(4000);
 	if (await page.$(selectors.CHECK_ELEMENT)) {
 		console.log('Parser signed in');
 		return page;
