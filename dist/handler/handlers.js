@@ -1,40 +1,51 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUsersGroup = exports.checkIfUserInGroups = exports.checkIfUserInGroup = exports.signIn = void 0;
+const selector_1 = require("./selector");
 async function signIn(browser, id) {
     const page = await browser.newPage();
     page.setDefaultTimeout(10000);
     await page.goto(`https://vk.com/${id}`);
     await page.waitForTimeout(2000);
-    const emailInput = await page.$('input#quick_email');
+    const signInButton = await page.$(selector_1.selectors.SIGNIN_BUTTON);
+    await (signInButton === null || signInButton === void 0 ? void 0 : signInButton.click());
+    await page.waitForTimeout(2000);
+    const emailInput = await page.$(selector_1.selectors.EMAIL_INPUT);
     await (emailInput === null || emailInput === void 0 ? void 0 : emailInput.type(process.env.VK_EMAIL));
-    await page.waitForTimeout(1000);
-    const passwordInput = await page.$('input#quick_pass');
+    const toPasswordButton = await page.$(selector_1.selectors.TO_PASSWORD_BUTTON);
+    toPasswordButton === null || toPasswordButton === void 0 ? void 0 : toPasswordButton.click();
+    await page.waitForTimeout(2000);
+    const passwordInput = await page.$(selector_1.selectors.PASSWORD_INPUT);
     await (passwordInput === null || passwordInput === void 0 ? void 0 : passwordInput.type(process.env.VK_PASSWORD));
-    await page.waitForTimeout(1000);
-    const loginButton = await page.$('#quick_login_button');
+    await page.waitForTimeout(2000);
+    const loginButton = await page.$(selector_1.selectors.LOGIN_BUTTON);
     await (loginButton === null || loginButton === void 0 ? void 0 : loginButton.click());
-    await page.waitForTimeout(1000);
-    console.log('Parser signed in');
-    return page;
+    await page.waitForTimeout(2000);
+    if (await page.$(selector_1.selectors.CHECK_ELEMENT)) {
+        console.log('Parser signed in');
+        return page;
+    }
+    else {
+        throw new Error('Cannot sign in!');
+    }
 }
 exports.signIn = signIn;
 async function checkIfUserInGroup(page, vkid, url) {
     await page.goto(url);
     await page.waitForTimeout(2000);
-    const folowers = await page.$('#public_followers > a > div > span.header_label.fl_l');
+    const folowers = await page.$(selector_1.selectors.FOLLOWERS);
     folowers === null || folowers === void 0 ? void 0 : folowers.click();
     await page.waitForTimeout(2000);
-    const search = await page.$('div > h2 > ul > a');
+    const search = await page.$(selector_1.selectors.SEARCH_ICON);
     if (!search)
         console.log('No search found');
     search === null || search === void 0 ? void 0 : search.click();
     await page.waitForTimeout(2000);
-    const input = await page.$('#search_query');
+    const input = await page.$(selector_1.selectors.SEARCH_INPUT);
     await (input === null || input === void 0 ? void 0 : input.type(vkid));
     await page.keyboard.press('Enter');
     await page.waitForTimeout(2000);
-    const user = await page.$$('#results > div');
+    const user = await page.$$(selector_1.selectors.USERS_IN_GROUP);
     if (user && user.length > 0) {
         return url;
     }
@@ -54,30 +65,30 @@ async function getUsersGroup(page, vkid) {
     try {
         await page.goto(`https://vk.com/${vkid}`);
         await page.waitForTimeout(2000);
-        const groups_counter_node = await page.$('#profile_idols > a > div > span.header_count.fl_l');
+        const groups_counter_node = await page.$(selector_1.selectors.USER_GROUPS);
         const groups_counter = await page.evaluate((el) => el.textContent, groups_counter_node);
-        const groups = await page.$('#profile_idols > a');
+        const groups = await page.$(selector_1.selectors.GROUPS);
         if (!groups) {
             throw new Error('No groups here');
         }
         await (groups === null || groups === void 0 ? void 0 : groups.click());
         await page.waitForTimeout(2000);
-        const box = await page.$('#box_layer > div.popup_box_container > div > div.box_title_wrap.box_grey > div.box_title');
+        const box = await page.$(selector_1.selectors.GROUPS_BOX);
         await box.click();
         await page.waitForTimeout(2000);
-        let groupsList = await page.$$('#fans_rowsidols > div > div.fans_idol_info > div.fans_idol_name > a');
+        let groupsList = await page.$$(selector_1.selectors.GROUPS_LINKS);
         if (!groupsList || groupsList.length < 1) {
             throw new Error('No groups');
         }
         while (groupsList.length < groups_counter) {
-            await page.$eval('#fans_more_linkidols', (e) => {
+            await page.$eval(selector_1.selectors.MORE_GROUPS, (e) => {
                 e.scrollIntoView({
                     behavior: 'smooth',
                     block: 'end',
                     inline: 'end',
                 });
             });
-            groupsList = await page.$$('div > div.fans_idol_info > div.fans_idol_name > a');
+            groupsList = await page.$$(selector_1.selectors.GROUPS_LINKS);
         }
         await page.waitForTimeout(2000);
         for (let i = 0; i < groupsList.length; i++) {
