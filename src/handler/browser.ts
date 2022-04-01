@@ -11,7 +11,7 @@ export class BrowserHandler {
 			'--disable-setuid-sandbox',
 			'--no-sandbox',
 		],
-		headless: false,
+		headless: true,
 		ignoreHTTPSErrors: true,
 		slowMo: 50,
 		ignoreDefaultArgs: ['--disable-extensions'],
