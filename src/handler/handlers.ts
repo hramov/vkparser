@@ -1,23 +1,37 @@
 import { Browser, ElementHandle, Page } from 'puppeteer';
+import { selectors } from './selector';
 
 export async function signIn(browser: Browser, id: string) {
 	const page = await browser.newPage();
 	page.setDefaultTimeout(10000);
+
 	await page.goto(`https://vk.com/${id}`);
 	await page.waitForTimeout(2000);
-	const emailInput = await page.$('input#quick_email');
+
+	const signInButton = await page.$(selectors.SIGNIN_BUTTON);
+	await signInButton?.click();
+	await page.waitForTimeout(2000);
+
+	const emailInput = await page.$(selectors.EMAIL_INPUT);
+
 	await emailInput?.type(process.env.VK_EMAIL!);
+	const toPasswordButton = await page.$(selectors.TO_PASSWORD_BUTTON);
+	toPasswordButton?.click();
+	await page.waitForTimeout(2000);
 
-	await page.waitForTimeout(1000);
-	const passwordInput = await page.$('input#quick_pass');
+	const passwordInput = await page.$(selectors.PASSWORD_INPUT);
 	await passwordInput?.type(process.env.VK_PASSWORD!);
+	await page.waitForTimeout(2000);
 
-	await page.waitForTimeout(1000);
-	const loginButton = await page.$('#quick_login_button');
+	const loginButton = await page.$(selectors.LOGIN_BUTTON);
 	await loginButton?.click();
-	await page.waitForTimeout(1000);
-	console.log('Parser signed in');
-	return page;
+	await page.waitForTimeout(2000);
+	if (await page.$(selectors.CHECK_ELEMENT)) {
+		console.log('Parser signed in');
+		return page;
+	} else {
+		throw new Error('Cannot sign in!')
+	}
 }
 
 export async function checkIfUserInGroup(
@@ -27,20 +41,18 @@ export async function checkIfUserInGroup(
 ) {
 	await page.goto(url);
 	await page.waitForTimeout(2000);
-	const folowers = await page.$(
-		'#public_followers > a > div > span.header_label.fl_l',
-	);
+	const folowers = await page.$(selectors.FOLLOWERS);
 	folowers?.click();
 	await page.waitForTimeout(2000);
-	const search = await page.$('div > h2 > ul > a');
+	const search = await page.$(selectors.SEARCH_ICON);
 	if (!search) console.log('No search found');
 	search?.click();
 	await page.waitForTimeout(2000);
-	const input = await page.$('#search_query');
+	const input = await page.$(selectors.SEARCH_INPUT);
 	await input?.type(vkid);
 	await page.keyboard.press('Enter');
 	await page.waitForTimeout(2000);
-	const user = await page.$$('#results > div');
+	const user = await page.$$(selectors.USERS_IN_GROUP);
 	if (user && user.length > 0) {
 		return url;
 	}
@@ -69,45 +81,37 @@ export async function getUsersGroup(
 		await page.goto(`https://vk.com/${vkid}`);
 		await page.waitForTimeout(2000);
 
-		const groups_counter_node = await page.$(
-			'#profile_idols > a > div > span.header_count.fl_l',
-		);
+		const groups_counter_node = await page.$(selectors.USER_GROUPS);
 		const groups_counter = await page.evaluate(
 			(el) => el.textContent,
 			groups_counter_node,
 		);
 
-		const groups = await page.$('#profile_idols > a');
+		const groups = await page.$(selectors.GROUPS);
 		if (!groups) {
 			throw new Error('No groups here');
 		}
 		await groups?.click();
 		await page.waitForTimeout(2000);
-		const box = await page.$(
-			'#box_layer > div.popup_box_container > div > div.box_title_wrap.box_grey > div.box_title',
-		);
+		const box = await page.$(selectors.GROUPS_BOX);
 		await box!.click();
 
 		await page.waitForTimeout(2000);
 
-		let groupsList: ElementHandle<Element>[] = await page.$$(
-			'#fans_rowsidols > div > div.fans_idol_info > div.fans_idol_name > a',
-		);
+		let groupsList: ElementHandle<Element>[] = await page.$$(selectors.GROUPS_LINKS);
 		if (!groupsList || groupsList.length < 1) {
 			throw new Error('No groups');
 		}
 
 		while (groupsList.length < groups_counter) {
-			await page.$eval('#fans_more_linkidols', (e) => {
+			await page.$eval(selectors.MORE_GROUPS, (e) => {
 				e.scrollIntoView({
 					behavior: 'smooth',
 					block: 'end',
 					inline: 'end',
 				});
 			});
-			groupsList = await page.$$(
-				'div > div.fans_idol_info > div.fans_idol_name > a',
-			);
+			groupsList = await page.$$(selectors.GROUPS_LINKS);
 		}
 
 		await page.waitForTimeout(2000);
@@ -121,7 +125,6 @@ export async function getUsersGroup(
 				(el) => el.getAttribute('href'),
 				groupsList[i],
 			);
-
 			groups_list_eval.push(`https://vk.com${href}`);
 		}
 	} catch (err) {
