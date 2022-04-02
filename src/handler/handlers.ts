@@ -36,6 +36,7 @@ export async function signIn(browser: Browser, id: string) {
 	// } else {
 	// 	throw new Error('Cannot sign in!')
 	// }
+	return page;
 }
 
 export async function checkIfUserInGroup(
