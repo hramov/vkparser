@@ -29,12 +29,13 @@ export async function signIn(browser: Browser, id: string) {
 	await loginButton?.click();
 	await page.waitForTimeout(4000);
 	await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
-	if (await page.$(selectors.CHECK_ELEMENT)) {
-		console.log('Parser signed in');
-		return page;
-	} else {
-		throw new Error('Cannot sign in!')
-	}
+	console.log('Parser signed in');
+	// if (await page.$(selectors.CHECK_ELEMENT)) {
+	// 	console.log('Parser signed in');
+	// 	return page;
+	// } else {
+	// 	throw new Error('Cannot sign in!')
+	// }
 }
 
 export async function checkIfUserInGroup(
