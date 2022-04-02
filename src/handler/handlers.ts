@@ -15,6 +15,7 @@ export async function signIn(browser: Browser, id: string) {
 
 	const emailInput = await page.$(selectors.EMAIL_INPUT);
 	await emailInput?.type(process.env.VK_EMAIL!);
+	console.log('Input email');
 	const toPasswordButton = await page.$(selectors.TO_PASSWORD_BUTTON);
 	toPasswordButton?.click();
 	await page.waitForTimeout(2000);
@@ -23,9 +24,13 @@ export async function signIn(browser: Browser, id: string) {
 
 	const passwordInput = await page.$(selectors.PASSWORD_INPUT);
 	await passwordInput?.type(process.env.VK_PASSWORD!);
+	console.log('Input password');
 	await page.waitForTimeout(2000);
 	await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
 	const loginButton = await page.$(selectors.LOGIN_BUTTON);
+	if (loginButton) {
+		console.log("Logged in")
+	}
 	await loginButton?.click();
 	await page.waitForTimeout(4000);
 	await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
