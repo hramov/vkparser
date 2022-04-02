@@ -7,25 +7,28 @@ export async function signIn(browser: Browser, id: string) {
 
 	await page.goto(`https://vk.com/${id}`);
 	await page.waitForTimeout(2000);
-
+	await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
 	const signInButton = await page.$(selectors.SIGNIN_BUTTON);
 	await signInButton?.click();
 	await page.waitForTimeout(2000);
+	await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
 
 	const emailInput = await page.$(selectors.EMAIL_INPUT);
-
 	await emailInput?.type(process.env.VK_EMAIL!);
 	const toPasswordButton = await page.$(selectors.TO_PASSWORD_BUTTON);
 	toPasswordButton?.click();
 	await page.waitForTimeout(2000);
 
+	await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
+
 	const passwordInput = await page.$(selectors.PASSWORD_INPUT);
 	await passwordInput?.type(process.env.VK_PASSWORD!);
 	await page.waitForTimeout(2000);
-
+	await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
 	const loginButton = await page.$(selectors.LOGIN_BUTTON);
 	await loginButton?.click();
 	await page.waitForTimeout(4000);
+	await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
 	if (await page.$(selectors.CHECK_ELEMENT)) {
 		console.log('Parser signed in');
 		return page;
