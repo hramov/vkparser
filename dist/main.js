@@ -65,7 +65,9 @@ let Parser = class Parser {
         catch (_err) {
             const err = _err;
             console.log(err.message);
-            await this.database.instance.query(`update queue set taken = false where id = ${data.id}`);
+            // await this.database.instance.query(
+            // 	`update queue set taken = false where id = ${data.id}`,
+            // );
         }
     }
     async getGroups(id, vkid) {
@@ -76,7 +78,9 @@ let Parser = class Parser {
         catch (_err) {
             const err = _err;
             console.log(err.message);
-            await this.database.instance.query(`update queue set taken = false where id = ${id}`);
+            // await this.database.instance.query(
+            // 	`update queue set taken = false where id = ${id}`,
+            // );
         }
         return groups;
     }
@@ -88,7 +92,9 @@ let Parser = class Parser {
         catch (_err) {
             const err = _err;
             console.log(err.message);
-            await this.database.instance.query(`update queue set taken = false where id = ${id}`);
+            // await this.database.instance.query(
+            // 	`update queue set taken = false where id = ${id}`,
+            // );
         }
         return result;
     }
@@ -104,8 +110,11 @@ let Parser = class Parser {
                         const taken = new Date();
                         await this.database.instance.query(`update queue set taken = true where id = ${data.id}`);
                         const groups = await this.getGroups(data.id, data.vkid);
+                        console.log(groups);
                         const userInGroups = await this.getUserInGroups(data.id, data.vkid, data.groups);
+                        console.log(userInGroups);
                         const result = groups.filter((group) => userInGroups.includes(group));
+                        console.log(result);
                         await this.proceedGroups(data, taken, result);
                     }
                 }

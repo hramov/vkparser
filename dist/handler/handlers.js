@@ -3,72 +3,83 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUsersGroup = exports.checkIfUserInGroups = exports.checkIfUserInGroup = exports.signIn = void 0;
 const selector_1 = require("./selector");
 async function signIn(browser, id) {
-    const page = await browser.newPage();
-    page.setDefaultTimeout(10000);
-    await page.goto(`https://vk.com/${id}`);
-    await page.waitForTimeout(2000);
-    await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg' });
-    const signInButton = await page.$(selector_1.selectors.SIGNIN_BUTTON);
-    await (signInButton === null || signInButton === void 0 ? void 0 : signInButton.click());
-    await page.waitForTimeout(2000);
-    await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg' });
-    const emailInput = await page.$(selector_1.selectors.EMAIL_INPUT);
-    await (emailInput === null || emailInput === void 0 ? void 0 : emailInput.type(process.env.VK_EMAIL));
-    console.log('Input email');
-    const toPasswordButton = await page.$(selector_1.selectors.TO_PASSWORD_BUTTON);
-    toPasswordButton === null || toPasswordButton === void 0 ? void 0 : toPasswordButton.click();
-    await page.waitForTimeout(2000);
-    await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg' });
-    const passwordInput = await page.$(selector_1.selectors.PASSWORD_INPUT);
-    await (passwordInput === null || passwordInput === void 0 ? void 0 : passwordInput.type(process.env.VK_PASSWORD));
-    console.log('Input password');
-    await page.waitForTimeout(2000);
-    await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg' });
-    const loginButton = await page.$(selector_1.selectors.LOGIN_BUTTON);
-    if (loginButton) {
-        console.log("Logged in");
+    try {
+        const page = await browser.newPage();
+        page.setDefaultTimeout(10000);
+        await page.goto(`https://vk.com/${id}`);
+        await page.waitForTimeout(2000);
+        await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg' });
+        const signInButton = await page.$(selector_1.selectors.SIGNIN_BUTTON);
+        await (signInButton === null || signInButton === void 0 ? void 0 : signInButton.click());
+        await page.waitForTimeout(2000);
+        await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg' });
+        const emailInput = await page.$(selector_1.selectors.EMAIL_INPUT);
+        await (emailInput === null || emailInput === void 0 ? void 0 : emailInput.type(process.env.VK_EMAIL));
+        console.log('Input email');
+        const toPasswordButton = await page.$(selector_1.selectors.TO_PASSWORD_BUTTON);
+        toPasswordButton === null || toPasswordButton === void 0 ? void 0 : toPasswordButton.click();
+        await page.waitForTimeout(2000);
+        await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg' });
+        const passwordInput = await page.$(selector_1.selectors.PASSWORD_INPUT);
+        await (passwordInput === null || passwordInput === void 0 ? void 0 : passwordInput.type(process.env.VK_PASSWORD));
+        console.log('Input password');
+        await page.waitForTimeout(2000);
+        await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg' });
+        const loginButton = await page.$(selector_1.selectors.LOGIN_BUTTON);
+        if (loginButton) {
+            console.log("Logged in");
+        }
+        await (loginButton === null || loginButton === void 0 ? void 0 : loginButton.click());
+        await page.waitForTimeout(4000);
+        await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg' });
+        console.log('Parser signed in');
+        return page;
     }
-    await (loginButton === null || loginButton === void 0 ? void 0 : loginButton.click());
-    await page.waitForTimeout(4000);
-    await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg' });
-    console.log('Parser signed in');
-    // if (await page.$(selectors.CHECK_ELEMENT)) {
-    // 	console.log('Parser signed in');
-    // 	return page;
-    // } else {
-    // 	throw new Error('Cannot sign in!')
-    // }
-    return page;
+    catch (err) {
+        console.log(err);
+        return null;
+    }
 }
 exports.signIn = signIn;
 async function checkIfUserInGroup(page, vkid, url) {
-    await page.goto(url);
-    await page.waitForTimeout(2000);
-    const folowers = await page.$(selector_1.selectors.FOLLOWERS);
-    folowers === null || folowers === void 0 ? void 0 : folowers.click();
-    await page.waitForTimeout(2000);
-    const search = await page.$(selector_1.selectors.SEARCH_ICON);
-    if (!search)
-        console.log('No search found');
-    search === null || search === void 0 ? void 0 : search.click();
-    await page.waitForTimeout(2000);
-    const input = await page.$(selector_1.selectors.SEARCH_INPUT);
-    await (input === null || input === void 0 ? void 0 : input.type(vkid));
-    await page.keyboard.press('Enter');
-    await page.waitForTimeout(2000);
-    const user = await page.$$(selector_1.selectors.USERS_IN_GROUP);
-    if (user && user.length > 0) {
-        return url;
+    try {
+        await page.goto(url);
+        await page.waitForTimeout(2000);
+        const folowers = await page.$(selector_1.selectors.FOLLOWERS);
+        folowers === null || folowers === void 0 ? void 0 : folowers.click();
+        await page.waitForTimeout(2000);
+        const search = await page.$(selector_1.selectors.SEARCH_ICON);
+        if (!search)
+            console.log('No search found');
+        search === null || search === void 0 ? void 0 : search.click();
+        await page.waitForTimeout(2000);
+        const input = await page.$(selector_1.selectors.SEARCH_INPUT);
+        await (input === null || input === void 0 ? void 0 : input.type(vkid));
+        await page.keyboard.press('Enter');
+        await page.waitForTimeout(2000);
+        const user = await page.$$(selector_1.selectors.USERS_IN_GROUP);
+        if (user && user.length > 0) {
+            return url;
+        }
+    }
+    catch (err) {
+        console.log(err);
     }
     return null;
 }
 exports.checkIfUserInGroup = checkIfUserInGroup;
 async function checkIfUserInGroups(page, vkid, groups) {
     const result = [];
-    for (let i = 0; i < groups.length; i++) {
-        result.push(await checkIfUserInGroup(page, vkid, groups[i]));
+    try {
+        for (let i = 0; i < groups.length; i++) {
+            result.push(await checkIfUserInGroup(page, vkid, groups[i]));
+        }
+        return result.filter((group) => group);
     }
-    return result.filter((group) => group);
+    catch (err) {
+        console.log(err);
+        return [];
+    }
 }
 exports.checkIfUserInGroups = checkIfUserInGroups;
 async function getUsersGroup(page, vkid) {

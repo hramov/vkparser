@@ -22,7 +22,9 @@ export class BrowserHandler {
 
 	async init() {
 		this.browser = await puppeteer.launch(this.options);
-		this.page = await signIn(this.browser, process.env.VK_ID!);
+		const page = await signIn(this.browser, process.env.VK_ID!);
+		if (page) this.page = page;
+		else return new Error('Cannot sign in!');
 	}
 
 	getPage() {

@@ -2,46 +2,45 @@ import { Browser, ElementHandle, Page } from 'puppeteer';
 import { selectors } from './selector';
 
 export async function signIn(browser: Browser, id: string) {
-	const page = await browser.newPage();
-	page.setDefaultTimeout(10000);
+	try {
+		const page = await browser.newPage();
+		page.setDefaultTimeout(10000);
 
-	await page.goto(`https://vk.com/${id}`);
-	await page.waitForTimeout(2000);
-	await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
-	const signInButton = await page.$(selectors.SIGNIN_BUTTON);
-	await signInButton?.click();
-	await page.waitForTimeout(2000);
-	await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
+		await page.goto(`https://vk.com/${id}`);
+		await page.waitForTimeout(2000);
+		await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
+		const signInButton = await page.$(selectors.SIGNIN_BUTTON);
+		await signInButton?.click();
+		await page.waitForTimeout(2000);
+		await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
 
-	const emailInput = await page.$(selectors.EMAIL_INPUT);
-	await emailInput?.type(process.env.VK_EMAIL!);
-	console.log('Input email');
-	const toPasswordButton = await page.$(selectors.TO_PASSWORD_BUTTON);
-	toPasswordButton?.click();
-	await page.waitForTimeout(2000);
+		const emailInput = await page.$(selectors.EMAIL_INPUT);
+		await emailInput?.type(process.env.VK_EMAIL!);
+		console.log('Input email');
+		const toPasswordButton = await page.$(selectors.TO_PASSWORD_BUTTON);
+		toPasswordButton?.click();
+		await page.waitForTimeout(2000);
 
-	await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
+		await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
 
-	const passwordInput = await page.$(selectors.PASSWORD_INPUT);
-	await passwordInput?.type(process.env.VK_PASSWORD!);
-	console.log('Input password');
-	await page.waitForTimeout(2000);
-	await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
-	const loginButton = await page.$(selectors.LOGIN_BUTTON);
-	if (loginButton) {
-		console.log("Logged in")
+		const passwordInput = await page.$(selectors.PASSWORD_INPUT);
+		await passwordInput?.type(process.env.VK_PASSWORD!);
+		console.log('Input password');
+		await page.waitForTimeout(2000);
+		await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
+		const loginButton = await page.$(selectors.LOGIN_BUTTON);
+		if (loginButton) {
+			console.log("Logged in")
+		}
+		await loginButton?.click();
+		await page.waitForTimeout(4000);
+		await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
+		console.log('Parser signed in');
+		return page;
+	} catch(err) {
+		console.log(err);
+		return null;
 	}
-	await loginButton?.click();
-	await page.waitForTimeout(4000);
-	await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
-	console.log('Parser signed in');
-	// if (await page.$(selectors.CHECK_ELEMENT)) {
-	// 	console.log('Parser signed in');
-	// 	return page;
-	// } else {
-	// 	throw new Error('Cannot sign in!')
-	// }
-	return page;
 }
 
 export async function checkIfUserInGroup(
@@ -49,22 +48,26 @@ export async function checkIfUserInGroup(
 	vkid: string,
 	url: string,
 ) {
-	await page.goto(url);
-	await page.waitForTimeout(2000);
-	const folowers = await page.$(selectors.FOLLOWERS);
-	folowers?.click();
-	await page.waitForTimeout(2000);
-	const search = await page.$(selectors.SEARCH_ICON);
-	if (!search) console.log('No search found');
-	search?.click();
-	await page.waitForTimeout(2000);
-	const input = await page.$(selectors.SEARCH_INPUT);
-	await input?.type(vkid);
-	await page.keyboard.press('Enter');
-	await page.waitForTimeout(2000);
-	const user = await page.$$(selectors.USERS_IN_GROUP);
-	if (user && user.length > 0) {
-		return url;
+	try {
+		await page.goto(url);
+		await page.waitForTimeout(2000);
+		const folowers = await page.$(selectors.FOLLOWERS);
+		folowers?.click();
+		await page.waitForTimeout(2000);
+		const search = await page.$(selectors.SEARCH_ICON);
+		if (!search) console.log('No search found');
+		search?.click();
+		await page.waitForTimeout(2000);
+		const input = await page.$(selectors.SEARCH_INPUT);
+		await input?.type(vkid);
+		await page.keyboard.press('Enter');
+		await page.waitForTimeout(2000);
+		const user = await page.$$(selectors.USERS_IN_GROUP);
+		if (user && user.length > 0) {
+			return url;
+		}
+	} catch (err) {
+		console.log(err);
 	}
 	return null;
 }
@@ -75,11 +78,15 @@ export async function checkIfUserInGroups(
 	groups: string[],
 ) {
 	const result: (string | null)[] = [];
-
-	for (let i = 0; i < groups.length; i++) {
+	try {
+		for (let i = 0; i < groups.length; i++) {
 		result.push(await checkIfUserInGroup(page, vkid, groups[i]));
 	}
 	return result.filter((group: string | null) => group);
+	} catch (err) {
+		console.log(err);
+		return [];
+	}
 }
 
 export async function getUsersGroup(

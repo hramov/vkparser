@@ -65,9 +65,9 @@ export class Parser {
 		} catch (_err) {
 			const err = _err as Error;
 			console.log(err.message);
-			await this.database.instance.query(
-				`update queue set taken = false where id = ${data.id}`,
-			);
+			// await this.database.instance.query(
+			// 	`update queue set taken = false where id = ${data.id}`,
+			// );
 		}
 	}
 
@@ -78,9 +78,9 @@ export class Parser {
 		} catch (_err) {
 			const err = _err as Error;
 			console.log(err.message);
-			await this.database.instance.query(
-				`update queue set taken = false where id = ${id}`,
-			);
+			// await this.database.instance.query(
+			// 	`update queue set taken = false where id = ${id}`,
+			// );
 		}
 		return groups;
 	}
@@ -92,9 +92,9 @@ export class Parser {
 		} catch (_err) {
 			const err = _err as Error;
 			console.log(err.message);
-			await this.database.instance.query(
-				`update queue set taken = false where id = ${id}`,
-			);
+			// await this.database.instance.query(
+			// 	`update queue set taken = false where id = ${id}`,
+			// );
 		}
 		return result;
 	}
@@ -116,16 +116,17 @@ export class Parser {
 						);
 
 						const groups = await this.getGroups(data.id, data.vkid);
-
+						console.log(groups);
 						const userInGroups = await this.getUserInGroups(
 							data.id,
 							data.vkid,
 							data.groups,
 						);
+						console.log(userInGroups);
 						const result = groups.filter((group: string) =>
 							userInGroups.includes(group),
 						);
-
+						console.log(result);	
 						await this.proceedGroups(data, taken, result);
 					}
 				}
