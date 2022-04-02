@@ -67,7 +67,7 @@ export async function checkIfUserInGroup(
 			return url;
 		}
 	} catch (err) {
-		console.log(err);
+		return new Error(err as string);
 	}
 	return null;
 }
@@ -80,19 +80,23 @@ export async function checkIfUserInGroups(
 	const result: (string | null)[] = [];
 	try {
 		for (let i = 0; i < groups.length; i++) {
-		result.push(await checkIfUserInGroup(page, vkid, groups[i]));
-	}
-	return result.filter((group: string | null) => group);
+			const res = await checkIfUserInGroup(page, vkid, groups[i]);
+			if (res instanceof Error) {
+				throw res;
+			} else {
+				result.push(res);
+			}
+		}
+		return result.filter((group: string | null) => group);
 	} catch (err) {
-		console.log(err);
-		return [];
+		return new Error(err as string);
 	}
 }
 
 export async function getUsersGroup(
 	page: Page,
 	vkid: string,
-): Promise<string[]> {
+): Promise<string[] | Error> {
 	const groups_list_eval = [];
 	try {
 		await page.goto(`https://vk.com/${vkid}`);
@@ -145,7 +149,7 @@ export async function getUsersGroup(
 			groups_list_eval.push(`https://vk.com${href}`);
 		}
 	} catch (err) {
-		console.log(err);
+		return new Error(err as string);
 	}
 	return groups_list_eval;
 }

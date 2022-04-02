@@ -63,7 +63,7 @@ async function checkIfUserInGroup(page, vkid, url) {
         }
     }
     catch (err) {
-        console.log(err);
+        return new Error(err);
     }
     return null;
 }
@@ -72,13 +72,18 @@ async function checkIfUserInGroups(page, vkid, groups) {
     const result = [];
     try {
         for (let i = 0; i < groups.length; i++) {
-            result.push(await checkIfUserInGroup(page, vkid, groups[i]));
+            const res = await checkIfUserInGroup(page, vkid, groups[i]);
+            if (res instanceof Error) {
+                throw res;
+            }
+            else {
+                result.push(res);
+            }
         }
         return result.filter((group) => group);
     }
     catch (err) {
-        console.log(err);
-        return [];
+        return new Error(err);
     }
 }
 exports.checkIfUserInGroups = checkIfUserInGroups;
@@ -122,7 +127,7 @@ async function getUsersGroup(page, vkid) {
         }
     }
     catch (err) {
-        console.log(err);
+        return new Error(err);
     }
     return groups_list_eval;
 }

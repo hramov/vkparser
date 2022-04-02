@@ -39,12 +39,15 @@ let Parser = class Parser {
             }
         }
     }
-    async proceedGroups(data, taken, groups) {
+    async proceedGroups(data, taken, groups, error) {
         console.log('Storing results');
         try {
-            await this.database.instance.query(`SELECT * FROM add_to_done(${data.order_id}, current_timestamp, '${JSON.stringify({
+            const done_id = await this.database.instance.query(`SELECT * FROM add_to_done(${data.order_id}, current_timestamp, '${JSON.stringify({
                 groups: groups,
             })}')`);
+            await this.database.instance.query(`
+				UPDATE done SET error = '${error === null || error === void 0 ? void 0 : error.message}' WHERE id = '${done_id}'
+			`);
             const stored = await this.database.instance.oneOrNone(`SELECT * FROM done WHERE order_id = ${data.order_id}`);
             console.table({
                 id: stored.id,
@@ -65,22 +68,19 @@ let Parser = class Parser {
         catch (_err) {
             const err = _err;
             console.log(err.message);
-            // await this.database.instance.query(
-            // 	`update queue set taken = false where id = ${data.id}`,
-            // );
         }
     }
     async getGroups(id, vkid) {
         let groups = [];
         try {
             groups = await (0, handlers_1.getUsersGroup)(this.page, vkid);
+            if (groups instanceof Error) {
+                throw groups;
+            }
         }
         catch (_err) {
             const err = _err;
             console.log(err.message);
-            // await this.database.instance.query(
-            // 	`update queue set taken = false where id = ${id}`,
-            // );
         }
         return groups;
     }
@@ -88,13 +88,13 @@ let Parser = class Parser {
         let result = [];
         try {
             result = await (0, handlers_1.checkIfUserInGroups)(this.page, vkid, groups);
+            if (result instanceof Error) {
+                throw result;
+            }
         }
         catch (_err) {
             const err = _err;
             console.log(err.message);
-            // await this.database.instance.query(
-            // 	`update queue set taken = false where id = ${id}`,
-            // );
         }
         return result;
     }
@@ -110,12 +110,21 @@ let Parser = class Parser {
                         const taken = new Date();
                         await this.database.instance.query(`update queue set taken = true where id = ${data.id}`);
                         const groups = await this.getGroups(data.id, data.vkid);
-                        console.log(groups);
-                        const userInGroups = await this.getUserInGroups(data.id, data.vkid, data.groups);
-                        console.log(userInGroups);
-                        const result = groups.filter((group) => userInGroups.includes(group));
-                        console.log(result);
-                        await this.proceedGroups(data, taken, result);
+                        if (groups instanceof Error) {
+                            await this.proceedGroups(data, taken, [], groups);
+                        }
+                        else {
+                            const userInGroups = await this.getUserInGroups(data.id, data.vkid, data.groups);
+                            if (userInGroups instanceof Error) {
+                                await this.proceedGroups(data, taken, [], userInGroups);
+                            }
+                            else {
+                                console.log(userInGroups);
+                                const result = groups.filter((group) => userInGroups.includes(group));
+                                console.log(result);
+                                await this.proceedGroups(data, taken, result, null);
+                            }
+                        }
                     }
                 }
                 isGo = true;
