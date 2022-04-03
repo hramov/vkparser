@@ -9,7 +9,7 @@ export const selectors = {
 	'SEARCH_ICON': 'div > h2 > ul > a',
 	'SEARCH_INPUT': '#search_query',
 	'USERS_IN_GROUP': '#results > div',
-	'USER_GROUPS': '#profile_idols > a > div > span.header_count.fl_l',
+	'USER_GROUPS': '#box_layer > div.popup_box_container > div > div.box_title_wrap.box_grey > div.box_title > span',
 	'GROUPS': '#profile_idols > a',
 	'GROUPS_BOX': '#box_layer > div.popup_box_container > div > div.box_title_wrap.box_grey > div.box_title',
 	'GROUPS_LINKS': '#fans_rowsidols > div > div.fans_idol_info > div.fans_idol_name > a',

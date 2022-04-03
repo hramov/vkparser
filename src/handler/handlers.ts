@@ -96,12 +96,6 @@ export async function getUsersGroup(
 		await page.goto(`https://vk.com/${vkid}`);
 		await page.waitForTimeout(2000);
 
-		const groups_counter_node = await page.$(selectors.USER_GROUPS);
-		const groups_counter = await page.evaluate(
-			(el) => el.textContent,
-			groups_counter_node,
-		);
-
 		const groups = await page.$(selectors.GROUPS);
 		if (!groups) {
 			throw new Error('No groups here');
@@ -112,6 +106,12 @@ export async function getUsersGroup(
 		await box!.click();
 
 		await page.waitForTimeout(2000);
+
+		const groups_counter_node = await page.$(selectors.USER_GROUPS);
+		const groups_counter = await page.evaluate(
+			(el) => el.textContent,
+			groups_counter_node,
+		);
 
 		let groupsList: ElementHandle<Element>[] = await page.$$(selectors.GROUPS_LINKS);
 		if (!groupsList || groupsList.length < 1) {
@@ -127,6 +127,7 @@ export async function getUsersGroup(
 				});
 			});
 			groupsList = await page.$$(selectors.GROUPS_LINKS);
+			console.log(groupsList.length, groups_counter)
 		}
 
 		await page.waitForTimeout(2000);
