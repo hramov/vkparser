@@ -43,8 +43,10 @@ export class Parser {
 				})}')`,
 			);
 
+			console.log(done_id);
+
 			await this.database.instance.query(`
-				UPDATE done SET error = '${error?.message}' WHERE id = '${done_id}'
+				UPDATE done SET error = '${error?.message}' WHERE id = '${done_id.data[0].id}'
 			`);
 			
 			const stored = await this.database.instance.oneOrNone(
