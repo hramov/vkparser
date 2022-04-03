@@ -4,7 +4,7 @@ import { selectors } from './selector';
 export async function signIn(browser: Browser, id: string) {
 	try {
 		const page = await browser.newPage();
-		// page.setDefaultTimeout(15000);
+		page.setDefaultTimeout(15000);
 
 		await page.goto(`https://vk.com/${id}`);
 		await page.waitForTimeout(2000);

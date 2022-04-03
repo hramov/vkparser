@@ -38,7 +38,7 @@ export class Parser {
 			const done_id = await this.database.instance.query(
 				`SELECT * FROM add_to_done(${
 					data.order_id
-				}, ${new Date(taken).toISOString()}, '${JSON.stringify({
+				}, ${taken.toISOString()}, '${JSON.stringify({
 					groups: groups,
 				})}')`,
 			);
