@@ -4,7 +4,7 @@ import { selectors } from './selector';
 export async function signIn(browser: Browser, id: string) {
 	try {
 		const page = await browser.newPage();
-		page.setDefaultTimeout(10000);
+		// page.setDefaultTimeout(15000);
 
 		await page.goto(`https://vk.com/${id}`);
 		await page.waitForTimeout(2000);
@@ -33,7 +33,7 @@ export async function signIn(browser: Browser, id: string) {
 			console.log("Logged in")
 		}
 		await loginButton?.click();
-		await page.waitForTimeout(4000);
+		await page.waitForTimeout(2000);
 		await page.screenshot({ path: './file.jpeg', fullPage: true, type: 'jpeg'});
 		console.log('Parser signed in');
 		return page;
